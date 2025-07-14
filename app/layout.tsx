@@ -9,6 +9,9 @@ export const metadata: Metadata = {
   description: '基于 FLUX.1 Kontext API 的智能图片生成和编辑应用',
   keywords: ['AI绘图', 'FLUX.1', 'Kontext', '图片生成', '人工智能'],
   authors: [{ name: 'AI Drawing App' }],
+  icons: {
+    icon: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎨</text></svg>",
+  },
 }
 
 export const viewport = {
