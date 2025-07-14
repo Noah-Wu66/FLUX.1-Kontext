@@ -151,9 +151,13 @@ const result = await response.json()
 ## 支持的参数
 
 ### AI 模型
+
+#### 图片编辑模型（支持参考图片）
 - **FLUX.1 Kontext Max** - 更强大的模型，处理复杂任务（默认）
 - **FLUX.1 Kontext Pro** - 专业图片编辑模型，擅长图片修改
 - **FLUX.1 Kontext Max Multi** - 支持多图片输入的强大模型
+
+#### 文生图模型（纯文本生成）
 - **FLUX.1 Kontext Max Text-to-Image** - 前沿图像生成模型
 - **FLUX.1 Kontext Pro Text-to-Image** - 专业文本到图像生成
 
@@ -169,7 +173,9 @@ const result = await response.json()
 - 超长竖屏 (9:21)
 - 竖版 (2:3)
 
-**注意**: 文生图模型（Max Text-to-Image、Pro Text-to-Image）不支持自动比例检测，需要手动选择比例。
+**重要说明**:
+- **图片编辑模型**: 支持上传参考图片，可自动检测图片比例
+- **文生图模型**: 纯文本到图像生成，不支持参考图片上传，需要手动选择比例
 
 ### 输出格式
 - **PNG** - 高质量无损格式（默认选项）

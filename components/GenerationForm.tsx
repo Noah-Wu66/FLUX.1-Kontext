@@ -215,7 +215,13 @@ export function GenerationForm({ onGenerate, loading = false }: GenerationFormPr
     }
 
     // 切换模型时清理图片状态，避免混乱
-    if (newModel === 'max-multi') {
+    if (newModel === 'max-text-to-image' || newModel === 'pro-text-to-image') {
+      // 切换到文生图模型，清理所有图片状态
+      setImageUrl('')
+      setImageUrls([])
+      setDetectedRatio('')
+      setImageDimensions(null)
+    } else if (newModel === 'max-multi') {
       // 切换到多图片模型，清理单图片状态
       if (imageUrl) {
         setImageUrls([imageUrl]) // 将单图片转为多图片数组
@@ -258,52 +264,54 @@ export function GenerationForm({ onGenerate, loading = false }: GenerationFormPr
           />
         </div>
 
-        {/* 参考图片上传 */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            参考图片 (可选)
-          </label>
+        {/* 参考图片上传 - 仅非文生图模型显示 */}
+        {!(model === 'max-text-to-image' || model === 'pro-text-to-image') && (
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              参考图片 (可选)
+            </label>
 
-          {model === 'max-multi' ? (
-            <MultiImageUpload
-              onImagesChange={handleMultiImagesChange}
-              currentImageUrls={imageUrls}
-              disabled={loading}
-              maxImages={4}
-            />
-          ) : (
-            <ImageUpload
-              onImageUpload={handleImageUpload}
-              onImageRemove={handleImageRemove}
-              currentImageUrl={imageUrl}
-              disabled={loading}
-            />
-          )}
-
-          <div className="mt-2 space-y-1">
-            <p className="text-xs text-gray-500">
-              {model === 'max-multi'
-                ? '上传多张参考图片可以帮助 AI 更好地理解复杂的需求和场景'
-                : '上传参考图片可以帮助 AI 更好地理解你的需求'
-              }
-            </p>
-            {aspectRatio === 'auto' && (
-              (model === 'max-multi' ? imageUrls.length > 0 : imageUrl) && (
-                <div className="text-xs">
-                  {isDetecting ? (
-                    <span className="text-blue-600">🔍 正在检测图片比例...</span>
-                  ) : imageDimensions && detectedRatio ? (
-                    <span className="text-green-600">
-                      ✓ 检测到: {formatAspectRatioText(imageDimensions.width, imageDimensions.height, detectedRatio)}
-                    </span>
-                  ) : (
-                    <span className="text-gray-500">等待检测图片比例</span>
-                  )}
-                </div>
-              )
+            {model === 'max-multi' ? (
+              <MultiImageUpload
+                onImagesChange={handleMultiImagesChange}
+                currentImageUrls={imageUrls}
+                disabled={loading}
+                maxImages={4}
+              />
+            ) : (
+              <ImageUpload
+                onImageUpload={handleImageUpload}
+                onImageRemove={handleImageRemove}
+                currentImageUrl={imageUrl}
+                disabled={loading}
+              />
             )}
+
+            <div className="mt-2 space-y-1">
+              <p className="text-xs text-gray-500">
+                {model === 'max-multi'
+                  ? '上传多张参考图片可以帮助 AI 更好地理解复杂的需求和场景'
+                  : '上传参考图片可以帮助 AI 更好地理解你的需求'
+                }
+              </p>
+              {aspectRatio === 'auto' && (
+                (model === 'max-multi' ? imageUrls.length > 0 : imageUrl) && (
+                  <div className="text-xs">
+                    {isDetecting ? (
+                      <span className="text-blue-600">🔍 正在检测图片比例...</span>
+                    ) : imageDimensions && detectedRatio ? (
+                      <span className="text-green-600">
+                        ✓ 检测到: {formatAspectRatioText(imageDimensions.width, imageDimensions.height, detectedRatio)}
+                      </span>
+                    ) : (
+                      <span className="text-gray-500">等待检测图片比例</span>
+                    )}
+                  </div>
+                )
+              )}
+            </div>
           </div>
-        </div>
+        )}
 
         {/* 基础设置 */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
