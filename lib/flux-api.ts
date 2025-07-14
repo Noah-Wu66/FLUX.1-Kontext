@@ -21,7 +21,9 @@ if (typeof window === 'undefined') {
 const FLUX_MODELS = {
   max: 'fal-ai/flux-pro/kontext/max',
   pro: 'fal-ai/flux-pro/kontext',
-  'max-multi': 'fal-ai/flux-pro/kontext/max/multi'
+  'max-multi': 'fal-ai/flux-pro/kontext/max/multi',
+  'max-text-to-image': 'fal-ai/flux-pro/kontext/max/text-to-image',
+  'pro-text-to-image': 'fal-ai/flux-pro/kontext/text-to-image'
 } as const
 
 const getModelEndpoint = (model: FluxModel): string => {

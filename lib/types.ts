@@ -6,7 +6,7 @@ export type OutputFormat = 'jpeg' | 'png'
 
 export type SafetyTolerance = '0' | '1' | '2'
 
-export type FluxModel = 'max' | 'pro' | 'max-multi'
+export type FluxModel = 'max' | 'pro' | 'max-multi' | 'max-text-to-image' | 'pro-text-to-image'
 
 export interface FluxKontextInput {
   prompt: string

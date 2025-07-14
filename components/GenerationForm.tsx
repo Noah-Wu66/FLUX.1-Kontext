@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useMemo } from 'react'
 import { Wand2, Settings, Shuffle } from 'lucide-react'
 import { Button } from './ui/Button'
 import { Input } from './ui/Input'
@@ -16,8 +16,7 @@ interface GenerationFormProps {
   loading?: boolean
 }
 
-const aspectRatioOptions = [
-  { value: 'auto', label: '自动' },
+const baseAspectRatioOptions = [
   { value: '1:1', label: '正方形 (1:1)' },
   { value: '16:9', label: '宽屏 (16:9)' },
   { value: '9:16', label: '手机竖屏 (9:16)' },
@@ -43,7 +42,9 @@ const safetyToleranceOptions = [
 const modelOptions = [
   { value: 'max', label: 'FLUX.1 Kontext Max - 更强大的模型，处理复杂任务' },
   { value: 'pro', label: 'FLUX.1 Kontext Pro - 专业图片编辑模型' },
-  { value: 'max-multi', label: 'FLUX.1 Kontext Max Multi - 支持多图片输入的强大模型' }
+  { value: 'max-multi', label: 'FLUX.1 Kontext Max Multi - 支持多图片输入的强大模型' },
+  { value: 'max-text-to-image', label: 'FLUX.1 Kontext Max Text-to-Image - 前沿图像生成模型' },
+  { value: 'pro-text-to-image', label: 'FLUX.1 Kontext Pro Text-to-Image - 专业文本到图像生成' }
 ]
 
 export function GenerationForm({ onGenerate, loading = false }: GenerationFormProps) {
@@ -64,6 +65,19 @@ export function GenerationForm({ onGenerate, loading = false }: GenerationFormPr
   const [detectedRatio, setDetectedRatio] = useState<Exclude<AspectRatio, 'auto'> | ''>('')
   const [imageDimensions, setImageDimensions] = useState<{ width: number; height: number } | null>(null)
   const [isDetecting, setIsDetecting] = useState(false)
+
+  // 根据模型类型动态生成比例选项
+  const aspectRatioOptions = useMemo(() => {
+    const isTextToImageModel = model === 'max-text-to-image' || model === 'pro-text-to-image'
+
+    if (isTextToImageModel) {
+      // 文生图模型不显示"自动"选项
+      return baseAspectRatioOptions
+    } else {
+      // 其他模型显示"自动"选项
+      return [{ value: 'auto', label: '自动' }, ...baseAspectRatioOptions]
+    }
+  }, [model])
 
   const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {}
@@ -184,6 +198,22 @@ export function GenerationForm({ onGenerate, loading = false }: GenerationFormPr
   const handleModelChange = (newModel: FluxModel) => {
     setModel(newModel)
 
+    // 为文生图模型设置默认比例
+    if (newModel === 'max-text-to-image' || newModel === 'pro-text-to-image') {
+      // 文生图模型默认使用 3:2 比例
+      setAspectRatio('3:2')
+    } else {
+      // 切换到其他模型时，如果当前比例不在选项中，设置为auto
+      const currentModel = model
+      const wasTextToImageModel = currentModel === 'max-text-to-image' || currentModel === 'pro-text-to-image'
+
+      if (wasTextToImageModel && aspectRatio !== 'auto') {
+        // 从文生图模型切换到其他模型，设置为auto
+        setAspectRatio('auto')
+      }
+      // 其他情况保持当前比例
+    }
+
     // 切换模型时清理图片状态，避免混乱
     if (newModel === 'max-multi') {
       // 切换到多图片模型，清理单图片状态
@@ -284,13 +314,16 @@ export function GenerationForm({ onGenerate, loading = false }: GenerationFormPr
               value={aspectRatio}
               onChange={(e) => handleAspectRatioChange(e.target.value as AspectRatio)}
               helperText={
-                aspectRatio === 'auto'
-                  ? (model === 'max-multi' ? imageUrls.length > 0 : imageUrl)
-                    ? detectedRatio
-                      ? `自动检测: ${getAspectRatioInfo(detectedRatio).label}`
-                      : '等待检测图片比例'
-                    : '默认使用正方形 (1:1)'
-                  : `${aspectRatioInfo.width} × ${aspectRatioInfo.height} 像素`
+                // 文生图模型的帮助文本
+                (model === 'max-text-to-image' || model === 'pro-text-to-image')
+                  ? `${aspectRatioInfo.width} × ${aspectRatioInfo.height} 像素 - 文生图模型推荐手动选择比例`
+                  : aspectRatio === 'auto'
+                    ? (model === 'max-multi' ? imageUrls.length > 0 : imageUrl)
+                      ? detectedRatio
+                        ? `自动检测: ${getAspectRatioInfo(detectedRatio).label}`
+                        : '等待检测图片比例'
+                      : '默认使用正方形 (1:1)'
+                    : `${aspectRatioInfo.width} × ${aspectRatioInfo.height} 像素`
               }
             />
           </div>
