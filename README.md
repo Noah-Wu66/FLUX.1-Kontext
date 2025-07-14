@@ -4,12 +4,13 @@
 
 ## 功能特点
 
-- 🎨 **高质量图片生成** - 基于 FLUX.1 Kontext Max 模型
+- 🎨 **双模型支持** - 支持 FLUX.1 Kontext Max 和 Pro 两种模型
 - 🖼️ **多种图片比例** - 支持正方形、宽屏、竖屏等多种比例
 - 📱 **响应式设计** - 完美适配桌面端和移动端
 - ⚡ **快速生成** - 通常 10-30 秒内完成生成
 - 🔧 **高级参数** - 支持引导强度、安全等级、随机种子等设置
 - 📤 **图片上传** - 支持参考图片上传进行图片编辑
+- 🤖 **智能比例检测** - 自动检测上传图片的比例并选择最佳预设
 - 💾 **便捷下载** - 一键下载生成的图片
 
 ## 技术栈
@@ -103,8 +104,9 @@ const response = await fetch('/api/generate', {
     aspectRatio: '1:1',
     guidanceScale: 3.5,
     numImages: 1,
-    outputFormat: 'jpeg',
-    safetyTolerance: '2'
+    outputFormat: 'png',
+    safetyTolerance: '2',
+    model: 'max'
     // sync_mode 自动设置为 true，无需手动指定
   }),
 })
@@ -148,7 +150,12 @@ const result = await response.json()
 
 ## 支持的参数
 
+### AI 模型
+- **FLUX.1 Kontext Max** - 更强大的模型，处理复杂任务（默认）
+- **FLUX.1 Kontext Pro** - 专业图片编辑模型，擅长图片修改
+
 ### 图片比例
+- **自动** - 智能检测上传图片的比例（默认选项）
 - 正方形 (1:1)
 - 宽屏 (16:9)
 - 手机竖屏 (9:16)
@@ -160,11 +167,13 @@ const result = await response.json()
 - 竖版 (2:3)
 
 ### 输出格式
-- JPEG
-- PNG
+- **PNG** - 高质量无损格式（默认选项）
+- JPEG - 压缩格式，文件更小
 
 ### 安全等级
-- 1-6 级，1 为最严格，6 为最宽松
+- **0** - 最严格
+- **1** - 严格
+- **2** - 标准（默认）
 
 ### 重要说明
 - `sync_mode` 参数固定为 `true`，确保同步生成模式

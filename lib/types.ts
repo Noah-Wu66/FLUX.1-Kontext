@@ -1,10 +1,12 @@
 // FLUX.1 Kontext API 类型定义
 
-export type AspectRatio = '21:9' | '16:9' | '4:3' | '3:2' | '1:1' | '2:3' | '3:4' | '9:16' | '9:21'
+export type AspectRatio = 'auto' | '21:9' | '16:9' | '4:3' | '3:2' | '1:1' | '2:3' | '3:4' | '9:16' | '9:21'
 
 export type OutputFormat = 'jpeg' | 'png'
 
-export type SafetyTolerance = '1' | '2' | '3' | '4' | '5' | '6'
+export type SafetyTolerance = '0' | '1' | '2'
+
+export type FluxModel = 'max' | 'pro'
 
 export interface FluxKontextInput {
   prompt: string
@@ -36,12 +38,13 @@ export interface FluxKontextOutput {
 export interface GenerationRequest {
   prompt: string
   imageUrl?: string
-  aspectRatio: AspectRatio
+  aspectRatio: Exclude<AspectRatio, 'auto'> // 'auto' 在前端处理，不传递到后端
   guidanceScale: number
   numImages: number
   outputFormat: OutputFormat
   safetyTolerance: SafetyTolerance
   seed?: number
+  model: FluxModel
 }
 
 export interface GenerationResult {

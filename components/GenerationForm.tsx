@@ -7,8 +7,8 @@ import { Input } from './ui/Input'
 import { Select } from './ui/Select'
 import { Card } from './ui/Card'
 import { ImageUpload } from './ImageUpload'
-import type { GenerationRequest, AspectRatio, OutputFormat, SafetyTolerance } from '@/lib/types'
-import { generateRandomSeed, getAspectRatioInfo } from '@/lib/utils'
+import type { GenerationRequest, AspectRatio, OutputFormat, SafetyTolerance, FluxModel } from '@/lib/types'
+import { generateRandomSeed, getAspectRatioInfo, getImageDimensions, detectAspectRatio, formatAspectRatioText } from '@/lib/utils'
 
 interface GenerationFormProps {
   onGenerate: (request: GenerationRequest) => void
@@ -16,6 +16,7 @@ interface GenerationFormProps {
 }
 
 const aspectRatioOptions = [
+  { value: 'auto', label: '自动' },
   { value: '1:1', label: '正方形 (1:1)' },
   { value: '16:9', label: '宽屏 (16:9)' },
   { value: '9:16', label: '手机竖屏 (9:16)' },
@@ -28,30 +29,38 @@ const aspectRatioOptions = [
 ]
 
 const outputFormatOptions = [
-  { value: 'jpeg', label: 'JPEG' },
-  { value: 'png', label: 'PNG' }
+  { value: 'png', label: 'PNG' },
+  { value: 'jpeg', label: 'JPEG' }
 ]
 
 const safetyToleranceOptions = [
-  { value: '1', label: '最严格 (1)' },
-  { value: '2', label: '严格 (2)' },
-  { value: '3', label: '中等 (3)' },
-  { value: '4', label: '宽松 (4)' },
-  { value: '5', label: '很宽松 (5)' },
-  { value: '6', label: '最宽松 (6)' }
+  { value: '0', label: '最严格 (0)' },
+  { value: '1', label: '严格 (1)' },
+  { value: '2', label: '标准 (2)' }
+]
+
+const modelOptions = [
+  { value: 'max', label: 'FLUX.1 Kontext Max - 更强大的模型，处理复杂任务' },
+  { value: 'pro', label: 'FLUX.1 Kontext Pro - 专业图片编辑模型' }
 ]
 
 export function GenerationForm({ onGenerate, loading = false }: GenerationFormProps) {
   const [prompt, setPrompt] = useState('')
   const [imageUrl, setImageUrl] = useState<string>('')
-  const [aspectRatio, setAspectRatio] = useState<AspectRatio>('1:1')
+  const [aspectRatio, setAspectRatio] = useState<AspectRatio>('auto')
   const [guidanceScale, setGuidanceScale] = useState(3.5)
   const [numImages, setNumImages] = useState(1)
-  const [outputFormat, setOutputFormat] = useState<OutputFormat>('jpeg')
+  const [outputFormat, setOutputFormat] = useState<OutputFormat>('png')
   const [safetyTolerance, setSafetyTolerance] = useState<SafetyTolerance>('2')
+  const [model, setModel] = useState<FluxModel>('max')
   const [seed, setSeed] = useState<number | undefined>(undefined)
   const [showAdvanced, setShowAdvanced] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
+
+  // 自动检测相关状态
+  const [detectedRatio, setDetectedRatio] = useState<string>('')
+  const [imageDimensions, setImageDimensions] = useState<{ width: number; height: number } | null>(null)
+  const [isDetecting, setIsDetecting] = useState(false)
 
   const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {}
@@ -72,20 +81,70 @@ export function GenerationForm({ onGenerate, loading = false }: GenerationFormPr
     return Object.keys(newErrors).length === 0
   }
 
+  // 检测图片比例
+  const detectImageAspectRatio = async (url: string) => {
+    if (aspectRatio !== 'auto') return
+
+    setIsDetecting(true)
+    try {
+      const dimensions = await getImageDimensions(url)
+      setImageDimensions(dimensions)
+
+      const detected = detectAspectRatio(dimensions.width, dimensions.height)
+      setDetectedRatio(detected)
+    } catch (error) {
+      console.error('检测图片比例失败:', error)
+      setDetectedRatio('1:1') // 默认使用正方形
+    } finally {
+      setIsDetecting(false)
+    }
+  }
+
+  // 处理图片上传
+  const handleImageUpload = (url: string) => {
+    setImageUrl(url)
+    detectImageAspectRatio(url)
+  }
+
+  // 处理图片移除
+  const handleImageRemove = () => {
+    setImageUrl('')
+    setImageDimensions(null)
+    setDetectedRatio('')
+  }
+
+  // 处理比例选择变化
+  const handleAspectRatioChange = (newRatio: AspectRatio) => {
+    setAspectRatio(newRatio)
+    if (newRatio !== 'auto') {
+      setDetectedRatio('')
+      setImageDimensions(null)
+    } else if (imageUrl) {
+      detectImageAspectRatio(imageUrl)
+    }
+  }
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    
+
     if (!validateForm()) {
       return
     }
 
+    // 确定最终使用的比例
+    let finalAspectRatio = aspectRatio
+    if (aspectRatio === 'auto') {
+      finalAspectRatio = detectedRatio || '1:1'
+    }
+
     const request: GenerationRequest = {
       prompt: prompt.trim(),
-      aspectRatio,
+      aspectRatio: finalAspectRatio as Exclude<AspectRatio, 'auto'>,
       guidanceScale,
       numImages,
       outputFormat,
       safetyTolerance,
+      model,
       ...(imageUrl && { imageUrl }),
       ...(seed && { seed })
     }
@@ -102,6 +161,17 @@ export function GenerationForm({ onGenerate, loading = false }: GenerationFormPr
   return (
     <Card title="AI 图片生成" description="使用 FLUX.1 Kontext 生成高质量图片">
       <form onSubmit={handleSubmit} className="space-y-6">
+        {/* 模型选择 */}
+        <div>
+          <Select
+            label="AI 模型"
+            options={modelOptions}
+            value={model}
+            onChange={(e) => setModel(e.target.value as FluxModel)}
+            helperText="选择适合您需求的 FLUX.1 Kontext 模型"
+          />
+        </div>
+
         {/* 提示词输入 */}
         <div>
           <Input
@@ -120,25 +190,50 @@ export function GenerationForm({ onGenerate, loading = false }: GenerationFormPr
             参考图片 (可选)
           </label>
           <ImageUpload
-            onImageUpload={setImageUrl}
-            onImageRemove={() => setImageUrl('')}
+            onImageUpload={handleImageUpload}
+            onImageRemove={handleImageRemove}
             currentImageUrl={imageUrl}
             disabled={loading}
           />
-          <p className="mt-1 text-xs text-gray-500">
-            上传参考图片可以帮助 AI 更好地理解你的需求
-          </p>
+          <div className="mt-2 space-y-1">
+            <p className="text-xs text-gray-500">
+              上传参考图片可以帮助 AI 更好地理解你的需求
+            </p>
+            {aspectRatio === 'auto' && imageUrl && (
+              <div className="text-xs">
+                {isDetecting ? (
+                  <span className="text-blue-600">🔍 正在检测图片比例...</span>
+                ) : imageDimensions && detectedRatio ? (
+                  <span className="text-green-600">
+                    ✓ 检测到: {formatAspectRatioText(imageDimensions.width, imageDimensions.height, detectedRatio)}
+                  </span>
+                ) : (
+                  <span className="text-gray-500">等待检测图片比例</span>
+                )}
+              </div>
+            )}
+          </div>
         </div>
 
         {/* 基础设置 */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <Select
-            label="图片比例"
-            options={aspectRatioOptions}
-            value={aspectRatio}
-            onChange={(e) => setAspectRatio(e.target.value as AspectRatio)}
-            helperText={`${aspectRatioInfo.width} × ${aspectRatioInfo.height} 像素`}
-          />
+          <div>
+            <Select
+              label="图片比例"
+              options={aspectRatioOptions}
+              value={aspectRatio}
+              onChange={(e) => handleAspectRatioChange(e.target.value as AspectRatio)}
+              helperText={
+                aspectRatio === 'auto'
+                  ? imageUrl
+                    ? detectedRatio
+                      ? `自动检测: ${getAspectRatioInfo(detectedRatio).label}`
+                      : '等待检测图片比例'
+                    : '默认使用正方形 (1:1)'
+                  : `${aspectRatioInfo.width} × ${aspectRatioInfo.height} 像素`
+              }
+            />
+          </div>
 
           <div>
             <Input

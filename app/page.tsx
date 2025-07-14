@@ -13,12 +13,14 @@ export default function HomePage() {
   const [images, setImages] = useState<GeneratedImage[]>([])
   const [currentPrompt, setCurrentPrompt] = useState('')
   const [currentSeed, setCurrentSeed] = useState<number>()
+  const [currentModel, setCurrentModel] = useState<string>('')
   const { addToast, ToastContainer, success, error: showError } = useToast()
 
   const handleGenerate = async (request: GenerationRequest) => {
     setLoading(true)
     setCurrentPrompt(request.prompt)
     setCurrentSeed(request.seed)
+    setCurrentModel(request.model)
 
     try {
       const response = await fetch('/api/generate', {
@@ -109,6 +111,7 @@ export default function HomePage() {
               images={images}
               prompt={currentPrompt}
               seed={currentSeed}
+              model={currentModel}
               loading={loading}
             />
           </div>

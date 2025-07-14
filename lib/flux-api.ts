@@ -4,7 +4,8 @@ import type {
   FluxKontextOutput,
   GenerationRequest,
   GenerationResult,
-  QueueStatus
+  QueueStatus,
+  FluxModel
 } from './types'
 
 // 配置 FAL 客户端
@@ -15,7 +16,15 @@ if (typeof window === 'undefined') {
   })
 }
 
-const FLUX_KONTEXT_MODEL = 'fal-ai/flux-pro/kontext/max'
+// 模型端点映射
+const FLUX_MODELS = {
+  max: 'fal-ai/flux-pro/kontext/max',
+  pro: 'fal-ai/flux-pro/kontext'
+} as const
+
+const getModelEndpoint = (model: FluxModel): string => {
+  return FLUX_MODELS[model]
+}
 
 export class FluxAPI {
   private static instance: FluxAPI
@@ -34,6 +43,8 @@ export class FluxAPI {
    */
   async generateImage(request: GenerationRequest): Promise<GenerationResult> {
     try {
+      const modelEndpoint = getModelEndpoint(request.model)
+
       const input: FluxKontextInput = {
         prompt: request.prompt,
         guidance_scale: request.guidanceScale,
@@ -46,15 +57,9 @@ export class FluxAPI {
         ...(request.seed && { seed: request.seed })
       }
 
-      const result = await fal.subscribe(FLUX_KONTEXT_MODEL, {
+      const result = await fal.subscribe(modelEndpoint, {
         input,
-        logs: true,
-        onQueueUpdate: (update: any) => {
-          if (update.status === 'IN_PROGRESS') {
-            const logs = update.logs || []
-            console.log('生成进度:', logs.map((log: any) => log.message).join('\n'))
-          }
-        }
+        logs: false
       }) as any
 
       return {
@@ -76,6 +81,8 @@ export class FluxAPI {
    */
   async submitToQueue(request: GenerationRequest): Promise<{ requestId?: string; error?: string }> {
     try {
+      const modelEndpoint = getModelEndpoint(request.model)
+
       const input: FluxKontextInput = {
         prompt: request.prompt,
         guidance_scale: request.guidanceScale,
@@ -88,7 +95,7 @@ export class FluxAPI {
         ...(request.seed && { seed: request.seed })
       }
 
-      const result = await fal.queue.submit(FLUX_KONTEXT_MODEL, {
+      const result = await fal.queue.submit(modelEndpoint, {
         input
       }) as any
 
@@ -102,16 +109,18 @@ export class FluxAPI {
   /**
    * 检查队列状态（备用方法，主要使用同步模式）
    */
-  async checkQueueStatus(requestId: string): Promise<QueueStatus> {
+  async checkQueueStatus(requestId: string, model: FluxModel = 'max'): Promise<QueueStatus> {
     try {
-      const status: any = await fal.queue.status(FLUX_KONTEXT_MODEL, {
+      const modelEndpoint = getModelEndpoint(model)
+
+      const status: any = await fal.queue.status(modelEndpoint, {
         requestId,
-        logs: true
+        logs: false
       })
 
       return {
         status: status.status as QueueStatus['status'],
-        logs: status.logs || [],
+        logs: [],
         progress: status.progress
       }
     } catch (error) {
@@ -123,9 +132,11 @@ export class FluxAPI {
   /**
    * 获取队列结果（备用方法，主要使用同步模式）
    */
-  async getQueueResult(requestId: string): Promise<GenerationResult> {
+  async getQueueResult(requestId: string, model: FluxModel = 'max'): Promise<GenerationResult> {
     try {
-      const result = await fal.queue.result(FLUX_KONTEXT_MODEL, {
+      const modelEndpoint = getModelEndpoint(model)
+
+      const result = await fal.queue.result(modelEndpoint, {
         requestId
       }) as any
 

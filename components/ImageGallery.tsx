@@ -12,10 +12,11 @@ interface ImageGalleryProps {
   images: GeneratedImage[]
   prompt: string
   seed?: number
+  model?: string
   loading?: boolean
 }
 
-export function ImageGallery({ images, prompt, seed, loading = false }: ImageGalleryProps) {
+export function ImageGallery({ images, prompt, seed, model, loading = false }: ImageGalleryProps) {
   const [selectedImage, setSelectedImage] = useState<GeneratedImage | null>(null)
   const [downloading, setDownloading] = useState<string>('')
   const [copying, setCopying] = useState<string>('')
@@ -80,9 +81,9 @@ export function ImageGallery({ images, prompt, seed, loading = false }: ImageGal
 
   return (
     <>
-      <Card 
-        title="生成结果" 
-        description={`基于提示词"${prompt}"生成了 ${images.length} 张图片${seed ? ` (种子: ${seed})` : ''}`}
+      <Card
+        title="生成结果"
+        description={`使用 ${model?.toUpperCase() || 'FLUX.1'} 模型，基于提示词"${prompt}"生成了 ${images.length} 张图片${seed ? ` (种子: ${seed})` : ''}`}
       >
         <div className={`grid gap-4 ${images.length === 1 ? 'grid-cols-1' : 'grid-cols-1 md:grid-cols-2'}`}>
           {images.map((image, index) => (

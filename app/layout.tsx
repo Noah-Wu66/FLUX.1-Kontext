@@ -9,7 +9,11 @@ export const metadata: Metadata = {
   description: '基于 FLUX.1 Kontext API 的智能图片生成和编辑应用',
   keywords: ['AI绘图', 'FLUX.1', 'Kontext', '图片生成', '人工智能'],
   authors: [{ name: 'AI Drawing App' }],
-  viewport: 'width=device-width, initial-scale=1',
+}
+
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
 }
 
 export default function RootLayout({
