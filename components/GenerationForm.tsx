@@ -7,6 +7,7 @@ import { Input } from './ui/Input'
 import { Select } from './ui/Select'
 import { Card } from './ui/Card'
 import { ImageUpload } from './ImageUpload'
+import { MultiImageUpload } from './MultiImageUpload'
 import type { GenerationRequest, AspectRatio, OutputFormat, SafetyTolerance, FluxModel } from '@/lib/types'
 import { generateRandomSeed, getAspectRatioInfo, getImageDimensions, detectAspectRatio, formatAspectRatioText } from '@/lib/utils'
 
@@ -41,12 +42,14 @@ const safetyToleranceOptions = [
 
 const modelOptions = [
   { value: 'max', label: 'FLUX.1 Kontext Max - 更强大的模型，处理复杂任务' },
-  { value: 'pro', label: 'FLUX.1 Kontext Pro - 专业图片编辑模型' }
+  { value: 'pro', label: 'FLUX.1 Kontext Pro - 专业图片编辑模型' },
+  { value: 'max-multi', label: 'FLUX.1 Kontext Max Multi - 支持多图片输入的强大模型' }
 ]
 
 export function GenerationForm({ onGenerate, loading = false }: GenerationFormProps) {
   const [prompt, setPrompt] = useState('')
   const [imageUrl, setImageUrl] = useState<string>('')
+  const [imageUrls, setImageUrls] = useState<string[]>([])
   const [aspectRatio, setAspectRatio] = useState<AspectRatio>('auto')
   const [guidanceScale, setGuidanceScale] = useState(3.5)
   const [numImages, setNumImages] = useState(1)
@@ -100,17 +103,29 @@ export function GenerationForm({ onGenerate, loading = false }: GenerationFormPr
     }
   }
 
-  // 处理图片上传
+  // 处理单图片上传
   const handleImageUpload = (url: string) => {
     setImageUrl(url)
     detectImageAspectRatio(url)
   }
 
-  // 处理图片移除
+  // 处理单图片移除
   const handleImageRemove = () => {
     setImageUrl('')
     setImageDimensions(null)
     setDetectedRatio('')
+  }
+
+  // 处理多图片变化
+  const handleMultiImagesChange = (urls: string[]) => {
+    setImageUrls(urls)
+    // 如果有图片且是自动模式，检测第一张图片的比例
+    if (urls.length > 0 && aspectRatio === 'auto') {
+      detectImageAspectRatio(urls[0])
+    } else if (urls.length === 0) {
+      setImageDimensions(null)
+      setDetectedRatio('')
+    }
   }
 
   // 处理比例选择变化
@@ -119,8 +134,14 @@ export function GenerationForm({ onGenerate, loading = false }: GenerationFormPr
     if (newRatio !== 'auto') {
       setDetectedRatio('')
       setImageDimensions(null)
-    } else if (imageUrl) {
-      detectImageAspectRatio(imageUrl)
+    } else {
+      // 根据模型类型检测图片比例
+      const referenceUrl = model === 'max-multi'
+        ? (imageUrls.length > 0 ? imageUrls[0] : null)
+        : imageUrl
+      if (referenceUrl) {
+        detectImageAspectRatio(referenceUrl)
+      }
     }
   }
 
@@ -147,7 +168,8 @@ export function GenerationForm({ onGenerate, loading = false }: GenerationFormPr
       outputFormat,
       safetyTolerance,
       model,
-      ...(imageUrl && { imageUrl }),
+      ...(model === 'max-multi' && imageUrls.length > 0 && { imageUrls }),
+      ...(model !== 'max-multi' && imageUrl && { imageUrl }),
       ...(seed && { seed })
     }
 
@@ -156,6 +178,26 @@ export function GenerationForm({ onGenerate, loading = false }: GenerationFormPr
 
   const handleRandomSeed = () => {
     setSeed(generateRandomSeed())
+  }
+
+  // 处理模型切换
+  const handleModelChange = (newModel: FluxModel) => {
+    setModel(newModel)
+
+    // 切换模型时清理图片状态，避免混乱
+    if (newModel === 'max-multi') {
+      // 切换到多图片模型，清理单图片状态
+      if (imageUrl) {
+        setImageUrls([imageUrl]) // 将单图片转为多图片数组
+        setImageUrl('')
+      }
+    } else {
+      // 切换到单图片模型，清理多图片状态
+      if (imageUrls.length > 0) {
+        setImageUrl(imageUrls[0]) // 使用第一张图片
+        setImageUrls([])
+      }
+    }
   }
 
   const aspectRatioInfo = getAspectRatioInfo(aspectRatio)
@@ -169,7 +211,7 @@ export function GenerationForm({ onGenerate, loading = false }: GenerationFormPr
             label="AI 模型"
             options={modelOptions}
             value={model}
-            onChange={(e) => setModel(e.target.value as FluxModel)}
+            onChange={(e) => handleModelChange(e.target.value as FluxModel)}
             helperText="选择适合您需求的 FLUX.1 Kontext 模型"
           />
         </div>
@@ -191,28 +233,44 @@ export function GenerationForm({ onGenerate, loading = false }: GenerationFormPr
           <label className="block text-sm font-medium text-gray-700 mb-2">
             参考图片 (可选)
           </label>
-          <ImageUpload
-            onImageUpload={handleImageUpload}
-            onImageRemove={handleImageRemove}
-            currentImageUrl={imageUrl}
-            disabled={loading}
-          />
+
+          {model === 'max-multi' ? (
+            <MultiImageUpload
+              onImagesChange={handleMultiImagesChange}
+              currentImageUrls={imageUrls}
+              disabled={loading}
+              maxImages={4}
+            />
+          ) : (
+            <ImageUpload
+              onImageUpload={handleImageUpload}
+              onImageRemove={handleImageRemove}
+              currentImageUrl={imageUrl}
+              disabled={loading}
+            />
+          )}
+
           <div className="mt-2 space-y-1">
             <p className="text-xs text-gray-500">
-              上传参考图片可以帮助 AI 更好地理解你的需求
+              {model === 'max-multi'
+                ? '上传多张参考图片可以帮助 AI 更好地理解复杂的需求和场景'
+                : '上传参考图片可以帮助 AI 更好地理解你的需求'
+              }
             </p>
-            {aspectRatio === 'auto' && imageUrl && (
-              <div className="text-xs">
-                {isDetecting ? (
-                  <span className="text-blue-600">🔍 正在检测图片比例...</span>
-                ) : imageDimensions && detectedRatio ? (
-                  <span className="text-green-600">
-                    ✓ 检测到: {formatAspectRatioText(imageDimensions.width, imageDimensions.height, detectedRatio)}
-                  </span>
-                ) : (
-                  <span className="text-gray-500">等待检测图片比例</span>
-                )}
-              </div>
+            {aspectRatio === 'auto' && (
+              (model === 'max-multi' ? imageUrls.length > 0 : imageUrl) && (
+                <div className="text-xs">
+                  {isDetecting ? (
+                    <span className="text-blue-600">🔍 正在检测图片比例...</span>
+                  ) : imageDimensions && detectedRatio ? (
+                    <span className="text-green-600">
+                      ✓ 检测到: {formatAspectRatioText(imageDimensions.width, imageDimensions.height, detectedRatio)}
+                    </span>
+                  ) : (
+                    <span className="text-gray-500">等待检测图片比例</span>
+                  )}
+                </div>
+              )
             )}
           </div>
         </div>
@@ -227,7 +285,7 @@ export function GenerationForm({ onGenerate, loading = false }: GenerationFormPr
               onChange={(e) => handleAspectRatioChange(e.target.value as AspectRatio)}
               helperText={
                 aspectRatio === 'auto'
-                  ? imageUrl
+                  ? (model === 'max-multi' ? imageUrls.length > 0 : imageUrl)
                     ? detectedRatio
                       ? `自动检测: ${getAspectRatioInfo(detectedRatio).label}`
                       : '等待检测图片比例'

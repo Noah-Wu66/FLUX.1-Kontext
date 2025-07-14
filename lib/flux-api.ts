@@ -1,6 +1,7 @@
 import { fal } from '@fal-ai/client'
 import type {
   FluxKontextInput,
+  FluxKontextMultiInput,
   FluxKontextOutput,
   GenerationRequest,
   GenerationResult,
@@ -19,7 +20,8 @@ if (typeof window === 'undefined') {
 // 模型端点映射
 const FLUX_MODELS = {
   max: 'fal-ai/flux-pro/kontext/max',
-  pro: 'fal-ai/flux-pro/kontext'
+  pro: 'fal-ai/flux-pro/kontext',
+  'max-multi': 'fal-ai/flux-pro/kontext/max/multi'
 } as const
 
 const getModelEndpoint = (model: FluxModel): string => {
@@ -45,16 +47,35 @@ export class FluxAPI {
     try {
       const modelEndpoint = getModelEndpoint(request.model)
 
-      const input: FluxKontextInput = {
-        prompt: request.prompt,
-        guidance_scale: request.guidanceScale,
-        num_images: request.numImages,
-        output_format: request.outputFormat,
-        safety_tolerance: request.safetyTolerance,
-        aspect_ratio: request.aspectRatio,
-        sync_mode: true, // 必须为 true，不允许调整
-        ...(request.imageUrl && { image_url: request.imageUrl }),
-        ...(request.seed && { seed: request.seed })
+      // 根据模型类型构建不同的输入
+      let input: FluxKontextInput | FluxKontextMultiInput
+
+      if (request.model === 'max-multi') {
+        // 多图片模型
+        input = {
+          prompt: request.prompt,
+          guidance_scale: request.guidanceScale,
+          num_images: request.numImages,
+          output_format: request.outputFormat,
+          safety_tolerance: request.safetyTolerance,
+          aspect_ratio: request.aspectRatio,
+          sync_mode: true, // 必须为 true，不允许调整
+          ...(request.imageUrls && request.imageUrls.length > 0 && { image_urls: request.imageUrls }),
+          ...(request.seed && { seed: request.seed })
+        } as FluxKontextMultiInput
+      } else {
+        // 单图片模型
+        input = {
+          prompt: request.prompt,
+          guidance_scale: request.guidanceScale,
+          num_images: request.numImages,
+          output_format: request.outputFormat,
+          safety_tolerance: request.safetyTolerance,
+          aspect_ratio: request.aspectRatio,
+          sync_mode: true, // 必须为 true，不允许调整
+          ...(request.imageUrl && { image_url: request.imageUrl }),
+          ...(request.seed && { seed: request.seed })
+        } as FluxKontextInput
       }
 
       const result = await fal.subscribe(modelEndpoint, {
@@ -83,16 +104,35 @@ export class FluxAPI {
     try {
       const modelEndpoint = getModelEndpoint(request.model)
 
-      const input: FluxKontextInput = {
-        prompt: request.prompt,
-        guidance_scale: request.guidanceScale,
-        num_images: request.numImages,
-        output_format: request.outputFormat,
-        safety_tolerance: request.safetyTolerance,
-        aspect_ratio: request.aspectRatio,
-        sync_mode: true, // 必须为 true，不允许调整
-        ...(request.imageUrl && { image_url: request.imageUrl }),
-        ...(request.seed && { seed: request.seed })
+      // 根据模型类型构建不同的输入
+      let input: FluxKontextInput | FluxKontextMultiInput
+
+      if (request.model === 'max-multi') {
+        // 多图片模型
+        input = {
+          prompt: request.prompt,
+          guidance_scale: request.guidanceScale,
+          num_images: request.numImages,
+          output_format: request.outputFormat,
+          safety_tolerance: request.safetyTolerance,
+          aspect_ratio: request.aspectRatio,
+          sync_mode: true, // 必须为 true，不允许调整
+          ...(request.imageUrls && request.imageUrls.length > 0 && { image_urls: request.imageUrls }),
+          ...(request.seed && { seed: request.seed })
+        } as FluxKontextMultiInput
+      } else {
+        // 单图片模型
+        input = {
+          prompt: request.prompt,
+          guidance_scale: request.guidanceScale,
+          num_images: request.numImages,
+          output_format: request.outputFormat,
+          safety_tolerance: request.safetyTolerance,
+          aspect_ratio: request.aspectRatio,
+          sync_mode: true, // 必须为 true，不允许调整
+          ...(request.imageUrl && { image_url: request.imageUrl }),
+          ...(request.seed && { seed: request.seed })
+        } as FluxKontextInput
       }
 
       const result = await fal.queue.submit(modelEndpoint, {

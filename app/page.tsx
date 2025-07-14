@@ -96,7 +96,24 @@ export default function HomePage() {
           </p>
         </div>
 
-
+        {/* 隐私安全警告 */}
+        <div className="mb-8">
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <div className="flex items-start">
+              <div className="flex-shrink-0">
+                <svg className="w-5 h-5 text-blue-600 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.5 0L4.314 18.5c-.77.833.192 2.5 1.732 2.5z" />
+                </svg>
+              </div>
+              <div className="ml-3">
+                <h3 className="text-sm font-medium text-blue-800">隐私保护提醒</h3>
+                <div className="mt-1 text-sm text-blue-700">
+                  <p>为保证您的隐私及数据安全，已强制开启Sync Mode，结果直接返回终端，生成结果不记入上游API请求历史。</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
 
         {/* 主要布局 */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
