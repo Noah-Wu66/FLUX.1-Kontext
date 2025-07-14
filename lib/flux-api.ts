@@ -1,10 +1,10 @@
 import { fal } from '@fal-ai/client'
-import type { 
-  FluxKontextInput, 
-  FluxKontextOutput, 
-  GenerationRequest, 
+import type {
+  FluxKontextInput,
+  FluxKontextOutput,
+  GenerationRequest,
   GenerationResult,
-  QueueStatus 
+  QueueStatus
 } from './types'
 
 // 配置 FAL 客户端
@@ -49,12 +49,13 @@ export class FluxAPI {
       const result = await fal.subscribe(FLUX_KONTEXT_MODEL, {
         input,
         logs: true,
-        onQueueUpdate: (update) => {
+        onQueueUpdate: (update: any) => {
           if (update.status === 'IN_PROGRESS') {
-            console.log('生成进度:', update.logs?.map(log => log.message).join('\n'))
+            const logs = update.logs || []
+            console.log('生成进度:', logs.map((log: any) => log.message).join('\n'))
           }
         }
-      })
+      }) as any
 
       return {
         success: true,
@@ -71,7 +72,7 @@ export class FluxAPI {
   }
 
   /**
-   * 提交生成请求到队列 - 异步方式
+   * 提交生成请求到队列 - 异步方式（备用方法，主要使用同步模式）
    */
   async submitToQueue(request: GenerationRequest): Promise<{ requestId?: string; error?: string }> {
     try {
@@ -87,11 +88,11 @@ export class FluxAPI {
         ...(request.seed && { seed: request.seed })
       }
 
-      const { request_id } = await fal.queue.submit(FLUX_KONTEXT_MODEL, {
+      const result = await fal.queue.submit(FLUX_KONTEXT_MODEL, {
         input
-      })
+      }) as any
 
-      return { requestId: request_id }
+      return { requestId: result.request_id }
     } catch (error) {
       console.error('提交队列失败:', error)
       return { error: error instanceof Error ? error.message : '未知错误' }
@@ -99,18 +100,18 @@ export class FluxAPI {
   }
 
   /**
-   * 检查队列状态
+   * 检查队列状态（备用方法，主要使用同步模式）
    */
   async checkQueueStatus(requestId: string): Promise<QueueStatus> {
     try {
-      const status = await fal.queue.status(FLUX_KONTEXT_MODEL, {
+      const status: any = await fal.queue.status(FLUX_KONTEXT_MODEL, {
         requestId,
         logs: true
       })
 
       return {
         status: status.status as QueueStatus['status'],
-        logs: status.logs,
+        logs: status.logs || [],
         progress: status.progress
       }
     } catch (error) {
@@ -120,13 +121,13 @@ export class FluxAPI {
   }
 
   /**
-   * 获取队列结果
+   * 获取队列结果（备用方法，主要使用同步模式）
    */
   async getQueueResult(requestId: string): Promise<GenerationResult> {
     try {
       const result = await fal.queue.result(FLUX_KONTEXT_MODEL, {
         requestId
-      })
+      }) as any
 
       return {
         success: true,
