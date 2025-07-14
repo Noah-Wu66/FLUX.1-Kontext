@@ -58,7 +58,7 @@ export function GenerationForm({ onGenerate, loading = false }: GenerationFormPr
   const [errors, setErrors] = useState<Record<string, string>>({})
 
   // 自动检测相关状态
-  const [detectedRatio, setDetectedRatio] = useState<string>('')
+  const [detectedRatio, setDetectedRatio] = useState<Exclude<AspectRatio, 'auto'> | ''>('')
   const [imageDimensions, setImageDimensions] = useState<{ width: number; height: number } | null>(null)
   const [isDetecting, setIsDetecting] = useState(false)
 
@@ -132,14 +132,16 @@ export function GenerationForm({ onGenerate, loading = false }: GenerationFormPr
     }
 
     // 确定最终使用的比例
-    let finalAspectRatio = aspectRatio
+    let finalAspectRatio: Exclude<AspectRatio, 'auto'>
     if (aspectRatio === 'auto') {
       finalAspectRatio = detectedRatio || '1:1'
+    } else {
+      finalAspectRatio = aspectRatio
     }
 
     const request: GenerationRequest = {
       prompt: prompt.trim(),
-      aspectRatio: finalAspectRatio as Exclude<AspectRatio, 'auto'>,
+      aspectRatio: finalAspectRatio,
       guidanceScale,
       numImages,
       outputFormat,

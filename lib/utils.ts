@@ -121,7 +121,7 @@ export function getImageDimensions(imageUrl: string): Promise<{ width: number; h
 /**
  * 根据图片尺寸计算最接近的预设比例
  */
-export function detectAspectRatio(width: number, height: number): string {
+export function detectAspectRatio(width: number, height: number): Exclude<import('./types').AspectRatio, 'auto'> {
   const ratio = width / height
 
   // 预设比例及其数值
@@ -149,7 +149,7 @@ export function detectAspectRatio(width: number, height: number): string {
     }
   }
 
-  return closestRatio.key
+  return closestRatio.key as Exclude<import('./types').AspectRatio, 'auto'>
 }
 
 /**
