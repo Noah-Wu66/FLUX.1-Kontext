@@ -53,29 +53,39 @@ export default function HomePage() {
   return (
     <div className="min-h-screen">
       {/* 头部 */}
-      <header className="bg-white shadow-sm border-b border-gray-200">
+      <header className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <div className="flex items-center">
-              <div className="flex items-center">
-                <div className="w-8 h-8 bg-gradient-to-br from-primary-500 to-primary-600 rounded-lg flex items-center justify-center mr-3">
-                  <Palette className="w-5 h-5 text-white" />
+          <div className="flex items-center justify-between h-14 sm:h-16">
+            <div className="flex items-center min-w-0 flex-1">
+              <div className="flex items-center min-w-0">
+                <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-primary-500 to-primary-600 rounded-lg flex items-center justify-center mr-2 sm:mr-3 flex-shrink-0">
+                  <Palette className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
                 </div>
-                <div>
-                  <h1 className="text-xl font-bold text-gray-900">FLUX.1 Kontext</h1>
-                  <p className="text-sm text-gray-500">AI 绘图应用</p>
+                <div className="min-w-0">
+                  <h1 className="text-lg sm:text-xl font-bold text-gray-900 truncate">FLUX.1 Kontext</h1>
+                  <p className="text-xs sm:text-sm text-gray-500 hidden sm:block">AI 绘图应用</p>
                 </div>
               </div>
             </div>
-            
-            <div className="flex items-center space-x-4">
+
+            <div className="flex items-center ml-4">
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => window.open('https://github.com', '_blank')}
+                className="hidden sm:inline-flex"
               >
                 <Github className="w-4 h-4 mr-2" />
                 GitHub
+              </Button>
+              {/* 移动端只显示图标 */}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => window.open('https://github.com', '_blank')}
+                className="sm:hidden p-2"
+              >
+                <Github className="w-5 h-5" />
               </Button>
             </div>
           </div>
@@ -83,31 +93,31 @@ export default function HomePage() {
       </header>
 
       {/* 主要内容 */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
         {/* 介绍部分 */}
-        <div className="text-center mb-12">
-          <div className="flex items-center justify-center mb-4">
-            <Sparkles className="w-8 h-8 text-primary-600 mr-2" />
-            <h2 className="text-3xl font-bold text-gray-900">AI 图片生成</h2>
+        <div className="text-center mb-8 sm:mb-12">
+          <div className="flex items-center justify-center mb-3 sm:mb-4">
+            <Sparkles className="w-6 h-6 sm:w-8 sm:h-8 text-primary-600 mr-2" />
+            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">AI 图片生成</h2>
           </div>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+          <p className="text-base sm:text-lg text-gray-600 max-w-2xl mx-auto px-4">
             基于 FLUX.1 Kontext Max 模型，为您提供高质量的 AI 图片生成服务。
             支持文本到图片、图片编辑等多种功能。
           </p>
         </div>
 
         {/* 隐私安全警告 */}
-        <div className="mb-8">
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+        <div className="mb-6 sm:mb-8">
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 sm:p-4">
             <div className="flex items-start">
               <div className="flex-shrink-0">
-                <svg className="w-5 h-5 text-blue-600 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.5 0L4.314 18.5c-.77.833.192 2.5 1.732 2.5z" />
                 </svg>
               </div>
-              <div className="ml-3">
+              <div className="ml-2 sm:ml-3">
                 <h3 className="text-sm font-medium text-blue-800">隐私保护提醒</h3>
-                <div className="mt-1 text-sm text-blue-700">
+                <div className="mt-1 text-xs sm:text-sm text-blue-700">
                   <p>为保证您的隐私及数据安全，已强制开启Sync Mode，结果直接返回终端，生成结果不记入上游API请求历史。</p>
                 </div>
               </div>
@@ -116,14 +126,14 @@ export default function HomePage() {
         </div>
 
         {/* 主要布局 */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
           {/* 左侧：生成表单 */}
-          <div>
+          <div className="order-1">
             <GenerationForm onGenerate={handleGenerate} loading={loading} />
           </div>
 
           {/* 右侧：图片展示 */}
-          <div>
+          <div className="order-2">
             <ImageGallery
               images={images}
               prompt={currentPrompt}
@@ -135,44 +145,44 @@ export default function HomePage() {
         </div>
 
         {/* 功能特点 */}
-        <div className="mt-16">
-          <h3 className="text-2xl font-bold text-gray-900 text-center mb-8">功能特点</h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="text-center p-6 bg-white rounded-xl shadow-sm border border-gray-200">
-              <div className="w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center mx-auto mb-4">
-                <Sparkles className="w-6 h-6 text-primary-600" />
+        <div className="mt-12 sm:mt-16">
+          <h3 className="text-xl sm:text-2xl font-bold text-gray-900 text-center mb-6 sm:mb-8">功能特点</h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+            <div className="text-center p-4 sm:p-6 bg-white rounded-xl shadow-sm border border-gray-200">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-primary-100 rounded-lg flex items-center justify-center mx-auto mb-3 sm:mb-4">
+                <Sparkles className="w-5 h-5 sm:w-6 sm:h-6 text-primary-600" />
               </div>
-              <h4 className="text-lg font-semibold text-gray-900 mb-2">高质量生成</h4>
-              <p className="text-gray-600">基于 FLUX.1 Kontext Max 模型，生成高分辨率、高质量的图片</p>
+              <h4 className="text-base sm:text-lg font-semibold text-gray-900 mb-2">高质量生成</h4>
+              <p className="text-sm sm:text-base text-gray-600">基于 FLUX.1 Kontext Max 模型，生成高分辨率、高质量的图片</p>
             </div>
-            
-            <div className="text-center p-6 bg-white rounded-xl shadow-sm border border-gray-200">
-              <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mx-auto mb-4">
-                <Palette className="w-6 h-6 text-green-600" />
+
+            <div className="text-center p-4 sm:p-6 bg-white rounded-xl shadow-sm border border-gray-200">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-green-100 rounded-lg flex items-center justify-center mx-auto mb-3 sm:mb-4">
+                <Palette className="w-5 h-5 sm:w-6 sm:h-6 text-green-600" />
               </div>
-              <h4 className="text-lg font-semibold text-gray-900 mb-2">多样化风格</h4>
-              <p className="text-gray-600">支持多种艺术风格和图片比例，满足不同创作需求</p>
+              <h4 className="text-base sm:text-lg font-semibold text-gray-900 mb-2">多样化风格</h4>
+              <p className="text-sm sm:text-base text-gray-600">支持多种艺术风格和图片比例，满足不同创作需求</p>
             </div>
-            
-            <div className="text-center p-6 bg-white rounded-xl shadow-sm border border-gray-200">
-              <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mx-auto mb-4">
-                <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+
+            <div className="text-center p-4 sm:p-6 bg-white rounded-xl shadow-sm border border-gray-200 sm:col-span-2 lg:col-span-1">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-purple-100 rounded-lg flex items-center justify-center mx-auto mb-3 sm:mb-4">
+                <svg className="w-5 h-5 sm:w-6 sm:h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                 </svg>
               </div>
-              <h4 className="text-lg font-semibold text-gray-900 mb-2">快速响应</h4>
-              <p className="text-gray-600">优化的 API 调用，通常在 10-30 秒内完成图片生成</p>
+              <h4 className="text-base sm:text-lg font-semibold text-gray-900 mb-2">快速响应</h4>
+              <p className="text-sm sm:text-base text-gray-600">优化的 API 调用，通常在 10-30 秒内完成图片生成</p>
             </div>
           </div>
         </div>
       </main>
 
       {/* 页脚 */}
-      <footer className="bg-gray-50 border-t border-gray-200 mt-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <footer className="bg-gray-50 border-t border-gray-200 mt-12 sm:mt-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
           <div className="text-center">
-            <p className="text-gray-600">
-              基于 FLUX.1 Kontext API 构建 | 
+            <p className="text-sm sm:text-base text-gray-600">
+              基于 FLUX.1 Kontext API 构建 |
               <a href="https://fal.ai" target="_blank" rel="noopener noreferrer" className="text-primary-600 hover:text-primary-700 ml-1">
                 Powered by FAL.ai
               </a>

@@ -254,14 +254,20 @@ export function GenerationForm({ onGenerate, loading = false }: GenerationFormPr
 
         {/* 提示词输入 */}
         <div>
-          <Input
-            label="提示词"
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            提示词
+          </label>
+          <textarea
             placeholder="描述你想要生成的图片..."
             value={prompt}
             onChange={(e) => setPrompt(e.target.value)}
-            error={errors.prompt}
-            helperText="详细描述你想要的图片内容、风格、颜色等"
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors duration-200 min-h-[88px] resize-none text-base"
+            rows={3}
           />
+          {errors.prompt && (
+            <p className="mt-1 text-sm text-red-600">{errors.prompt}</p>
+          )}
+          <p className="mt-1 text-sm text-gray-500">详细描述你想要的图片内容、风格、颜色等</p>
         </div>
 
         {/* 参考图片上传 - 仅非文生图模型显示 */}
@@ -314,7 +320,7 @@ export function GenerationForm({ onGenerate, loading = false }: GenerationFormPr
         )}
 
         {/* 基础设置 */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="space-y-4 sm:space-y-0 sm:grid sm:grid-cols-2 sm:gap-4">
           <div>
             <Select
               label="图片比例"
@@ -363,8 +369,8 @@ export function GenerationForm({ onGenerate, loading = false }: GenerationFormPr
           </Button>
 
           {showAdvanced && (
-            <div className="space-y-4 p-4 bg-gray-50 rounded-lg">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-4 p-3 sm:p-4 bg-gray-50 rounded-lg">
+              <div className="space-y-4 sm:space-y-0 sm:grid sm:grid-cols-2 sm:gap-4">
                 <div>
                   <Input
                     label="引导强度"
@@ -379,43 +385,51 @@ export function GenerationForm({ onGenerate, loading = false }: GenerationFormPr
                   />
                 </div>
 
-                <Select
-                  label="输出格式"
-                  options={outputFormatOptions}
-                  value={outputFormat}
-                  onChange={(e) => setOutputFormat(e.target.value as OutputFormat)}
-                  helperText="选择图片的输出格式"
-                />
+                <div>
+                  <Select
+                    label="输出格式"
+                    options={outputFormatOptions}
+                    value={outputFormat}
+                    onChange={(e) => setOutputFormat(e.target.value as OutputFormat)}
+                    helperText="选择图片的输出格式"
+                  />
+                </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Select
-                  label="安全等级"
-                  options={safetyToleranceOptions}
-                  value={safetyTolerance}
-                  onChange={(e) => setSafetyTolerance(e.target.value as SafetyTolerance)}
-                  helperText="控制内容安全检查的严格程度"
-                />
+              <div className="space-y-4 sm:space-y-0 sm:grid sm:grid-cols-2 sm:gap-4">
+                <div>
+                  <Select
+                    label="安全等级"
+                    options={safetyToleranceOptions}
+                    value={safetyTolerance}
+                    onChange={(e) => setSafetyTolerance(e.target.value as SafetyTolerance)}
+                    helperText="控制内容安全检查的严格程度"
+                  />
+                </div>
 
-                <div className="flex items-end gap-2">
-                  <div className="flex-1">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    随机种子
+                  </label>
+                  <div className="flex gap-2">
                     <Input
-                      label="随机种子"
                       type="number"
                       placeholder="留空为随机"
                       value={seed || ''}
                       onChange={(e) => setSeed(e.target.value ? parseInt(e.target.value) : undefined)}
                       helperText="相同种子生成相同图片"
+                      className="flex-1"
                     />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={handleRandomSeed}
+                      className="mt-0 self-start"
+                      size="md"
+                    >
+                      <Shuffle className="w-4 h-4" />
+                    </Button>
                   </div>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={handleRandomSeed}
-                    className="mb-6"
-                  >
-                    <Shuffle className="w-4 h-4" />
-                  </Button>
                 </div>
               </div>
             </div>
@@ -423,13 +437,13 @@ export function GenerationForm({ onGenerate, loading = false }: GenerationFormPr
         </div>
 
         {/* 生成按钮 */}
-        <div className="flex justify-center">
+        <div className="flex justify-center pt-2">
           <Button
             type="submit"
             loading={loading}
             disabled={loading || !prompt.trim()}
             size="lg"
-            className="w-full md:w-auto"
+            className="w-full sm:w-auto min-w-[200px]"
           >
             <Wand2 className="w-5 h-5 mr-2" />
             {loading ? '生成中...' : '生成图片'}

@@ -17,6 +17,9 @@ export const metadata: Metadata = {
 export const viewport = {
   width: 'device-width',
   initialScale: 1,
+  maximumScale: 1,
+  userScalable: false, // 防止用户缩放，提供一致的移动端体验
+  viewportFit: 'cover', // 适配有刘海屏的设备
 }
 
 export default function RootLayout({

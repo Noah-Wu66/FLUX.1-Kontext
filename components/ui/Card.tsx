@@ -10,14 +10,14 @@ interface CardProps {
 
 export function Card({ children, className, title, description }: CardProps) {
   return (
-    <div className={cn('bg-white rounded-xl shadow-sm border border-gray-200 p-6', className)}>
+    <div className={cn('bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6', className)}>
       {(title || description) && (
         <div className="mb-4">
           {title && (
-            <h3 className="text-lg font-semibold text-gray-900 mb-1">{title}</h3>
+            <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-1">{title}</h3>
           )}
           {description && (
-            <p className="text-sm text-gray-600">{description}</p>
+            <p className="text-sm text-gray-600 leading-relaxed">{description}</p>
           )}
         </div>
       )}

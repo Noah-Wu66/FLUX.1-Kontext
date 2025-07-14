@@ -31,6 +31,7 @@ export function Input({
         id={inputId}
         className={cn(
           'w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors duration-200',
+          'min-h-[44px] text-base', // 移动端优化：确保触摸目标尺寸，防止iOS缩放
           error
             ? 'border-red-300 focus:ring-red-500'
             : 'border-gray-300',

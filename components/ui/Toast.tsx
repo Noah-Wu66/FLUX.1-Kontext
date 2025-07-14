@@ -51,30 +51,30 @@ export function Toast({ type, title, message, duration = 5000, onClose }: ToastP
   return (
     <div
       className={cn(
-        'fixed top-4 right-4 max-w-sm w-full bg-white border rounded-lg shadow-lg p-4 transition-all duration-300 z-50',
+        'fixed top-4 right-4 left-4 sm:left-auto max-w-sm w-full sm:w-auto bg-white border rounded-lg shadow-lg p-3 sm:p-4 transition-all duration-300 z-50',
         toastStyles[type],
         isVisible ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-0'
       )}
     >
       <div className="flex">
         <div className="flex-shrink-0">
-          <Icon className={cn('h-5 w-5', iconStyles[type])} />
+          <Icon className={cn('h-4 w-4 sm:h-5 sm:w-5', iconStyles[type])} />
         </div>
-        <div className="ml-3 flex-1">
-          <p className="text-sm font-medium">{title}</p>
+        <div className="ml-2 sm:ml-3 flex-1 min-w-0">
+          <p className="text-xs sm:text-sm font-medium truncate">{title}</p>
           {message && (
-            <p className="mt-1 text-sm opacity-90">{message}</p>
+            <p className="mt-1 text-xs sm:text-sm opacity-90 line-clamp-2">{message}</p>
           )}
         </div>
-        <div className="ml-4 flex-shrink-0">
+        <div className="ml-2 sm:ml-4 flex-shrink-0">
           <button
             onClick={() => {
               setIsVisible(false)
               setTimeout(onClose, 300)
             }}
-            className="inline-flex text-gray-400 hover:text-gray-600 focus:outline-none"
+            className="inline-flex text-gray-400 hover:text-gray-600 focus:outline-none p-1 min-h-[44px] min-w-[44px] sm:min-h-auto sm:min-w-auto sm:p-0 items-center justify-center"
           >
-            <X className="h-4 w-4" />
+            <X className="h-3 w-3 sm:h-4 sm:w-4" />
           </button>
         </div>
       </div>
@@ -100,13 +100,14 @@ export function useToast() {
   }
 
   const ToastContainer = () => (
-    <div className="fixed top-4 right-4 z-50 space-y-2">
+    <div className="fixed top-4 right-4 left-4 sm:left-auto z-50 space-y-2 pointer-events-none">
       {toasts.map(toast => (
-        <Toast
-          key={toast.id}
-          {...toast}
-          onClose={() => removeToast(toast.id)}
-        />
+        <div key={toast.id} className="pointer-events-auto">
+          <Toast
+            {...toast}
+            onClose={() => removeToast(toast.id)}
+          />
+        </div>
       ))}
     </div>
   )
