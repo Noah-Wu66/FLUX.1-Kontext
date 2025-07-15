@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useMemo } from 'react'
+import React, { useState, useMemo, forwardRef, useImperativeHandle } from 'react'
 import { Wand2, Settings, Shuffle } from 'lucide-react'
 import { Button } from './ui/Button'
 import { Input } from './ui/Input'
@@ -14,8 +14,10 @@ import { generateRandomSeed, getAspectRatioInfo, getImageDimensions, detectAspec
 interface GenerationFormProps {
   onGenerate: (request: GenerationRequest) => void
   loading?: boolean
-  defaultModel?: FluxModel
-  requireImage?: boolean
+}
+
+export interface GenerationFormRef {
+  addToPrompt: (text: string) => void
 }
 
 const baseAspectRatioOptions = [
@@ -49,12 +51,8 @@ const modelOptions = [
   { value: 'pro-text-to-image', label: 'FLUX.1 Kontext Pro Text-to-Image - 专业文本到图像生成' }
 ]
 
-export function GenerationForm({
-  onGenerate,
-  loading = false,
-  defaultModel = 'max',
-  requireImage = false
-}: GenerationFormProps) {
+export const GenerationForm = forwardRef<GenerationFormRef, GenerationFormProps>(
+  ({ onGenerate, loading = false }, ref) => {
   const [prompt, setPrompt] = useState('')
   const [imageUrl, setImageUrl] = useState<string>('')
   const [imageUrls, setImageUrls] = useState<string[]>([])
@@ -63,7 +61,7 @@ export function GenerationForm({
   const [numImages, setNumImages] = useState(1)
   const [outputFormat, setOutputFormat] = useState<OutputFormat>('png')
   const [safetyTolerance, setSafetyTolerance] = useState<SafetyTolerance>('2')
-  const [model, setModel] = useState<FluxModel>(defaultModel)
+  const [model, setModel] = useState<FluxModel>('max')
   const [seed, setSeed] = useState<number | undefined>(undefined)
   const [showAdvanced, setShowAdvanced] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
@@ -72,6 +70,24 @@ export function GenerationForm({
   const [detectedRatio, setDetectedRatio] = useState<Exclude<AspectRatio, 'auto'> | ''>('')
   const [imageDimensions, setImageDimensions] = useState<{ width: number; height: number } | null>(null)
   const [isDetecting, setIsDetecting] = useState(false)
+
+  // 暴露给父组件的方法
+  useImperativeHandle(ref, () => ({
+    addToPrompt: (text: string) => {
+      setPrompt(prev => {
+        const trimmedPrev = prev.trim()
+        if (trimmedPrev === '') {
+          return text
+        }
+        // 如果已经包含这个文本，就不重复添加
+        if (trimmedPrev.includes(text)) {
+          return prev
+        }
+        // 添加文本，用逗号分隔
+        return `${trimmedPrev}, ${text}`
+      })
+    }
+  }), [])
 
   // 根据模型类型动态生成比例选项
   const aspectRatioOptions = useMemo(() => {
@@ -91,14 +107,6 @@ export function GenerationForm({
 
     if (!prompt.trim()) {
       newErrors.prompt = '请输入提示词'
-    }
-
-    if (requireImage) {
-      if (model === 'max-multi' && imageUrls.length === 0) {
-        newErrors.image = '此模式需要上传至少一张参考图片'
-      } else if (model !== 'max-multi' && !imageUrl) {
-        newErrors.image = '此模式需要上传参考图片'
-      }
     }
 
     if (guidanceScale < 1 || guidanceScale > 20) {
@@ -289,7 +297,7 @@ export function GenerationForm({
         {!(model === 'max-text-to-image' || model === 'pro-text-to-image') && (
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              参考图片 {requireImage ? '(必需)' : '(可选)'}
+              参考图片 (可选)
             </label>
 
             {model === 'max-multi' ? (
@@ -309,9 +317,6 @@ export function GenerationForm({
             )}
 
             <div className="mt-2 space-y-1">
-              {errors.image && (
-                <p className="text-sm text-red-600">{errors.image}</p>
-              )}
               <p className="text-xs text-gray-500">
                 {model === 'max-multi'
                   ? '上传多张参考图片可以帮助 AI 更好地理解复杂的需求和场景'
@@ -470,4 +475,6 @@ export function GenerationForm({
       </form>
     </Card>
   )
-}
+})
+
+GenerationForm.displayName = 'GenerationForm'

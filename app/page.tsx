@@ -150,7 +150,7 @@ export default function HomePage() {
             </div>
           </div>
         </div>
-      </main>
+      </div>
 
       {/* Toast 通知容器 */}
       <ToastContainer />

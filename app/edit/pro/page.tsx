@@ -1,9 +1,11 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useRef } from 'react'
 import { PenTool } from 'lucide-react'
 import { GenerationForm } from '@/components/GenerationForm'
 import { ImageGallery } from '@/components/ImageGallery'
+import { PromptPresets } from '@/components/PromptPresets'
+import { Card } from '@/components/ui/Card'
 import { useToast } from '@/components/ui/Toast'
 import type { GenerationRequest, GeneratedImage } from '@/lib/types'
 
@@ -14,6 +16,7 @@ export default function ProEditPage() {
   const [currentSeed, setCurrentSeed] = useState<number>()
   const [currentModel, setCurrentModel] = useState<string>('pro')
   const { addToast, ToastContainer, success, error: showError } = useToast()
+  const generationFormRef = useRef<{ addToPrompt: (text: string) => void }>(null)
 
   const handleGenerate = async (request: GenerationRequest) => {
     setLoading(true)
@@ -52,6 +55,12 @@ export default function ProEditPage() {
     }
   }
 
+  const handlePresetClick = (presetText: string) => {
+    if (generationFormRef.current) {
+      generationFormRef.current.addToPrompt(presetText)
+    }
+  }
+
   return (
     <div className="min-h-screen">
       {/* 页面标题 */}
@@ -86,19 +95,24 @@ export default function ProEditPage() {
       </div>
 
       {/* 主要布局 */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
         {/* 左侧：生成表单 */}
-        <div className="order-1">
-          <GenerationForm 
-            onGenerate={handleGenerate} 
+        <div className="order-1 lg:col-span-2">
+          <GenerationForm
+            ref={generationFormRef}
+            onGenerate={handleGenerate}
             loading={loading}
-            defaultModel="pro"
-            requireImage={true}
           />
         </div>
 
-        {/* 右侧：图片展示 */}
-        <div className="order-2">
+        {/* 右侧：预设词和图片展示 */}
+        <div className="order-2 space-y-6">
+          {/* 预设词 */}
+          <Card title="预设提示词" description="快速添加常用编辑指令">
+            <PromptPresets onPresetClick={handlePresetClick} />
+          </Card>
+
+          {/* 图片展示 */}
           <ImageGallery
             images={images}
             prompt={currentPrompt}

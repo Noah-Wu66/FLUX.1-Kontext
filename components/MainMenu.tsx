@@ -44,18 +44,18 @@ export function MainMenu({ className, onMenuItemSelect }: MainMenuProps) {
       icon: <Wand2 className="w-4 h-4" />,
       children: [
         {
-          id: 'flux-max-text-to-image',
-          label: 'FLUX.1 Kontext Max Text-to-Image',
-          icon: <Sparkles className="w-4 h-4" />,
-          href: '/generate/max-text-to-image',
-          onClick: () => console.log('Navigate to FLUX.1 Kontext Max Text-to-Image')
-        },
-        {
           id: 'flux-pro-text-to-image',
           label: 'FLUX.1 Kontext Pro Text-to-Image',
           icon: <Zap className="w-4 h-4" />,
           href: '/generate/pro-text-to-image',
           onClick: () => console.log('Navigate to FLUX.1 Kontext Pro Text-to-Image')
+        },
+        {
+          id: 'flux-max-text-to-image',
+          label: 'FLUX.1 Kontext Max Text-to-Image',
+          icon: <Sparkles className="w-4 h-4" />,
+          href: '/generate/max-text-to-image',
+          onClick: () => console.log('Navigate to FLUX.1 Kontext Max Text-to-Image')
         }
       ]
     },
@@ -64,6 +64,13 @@ export function MainMenu({ className, onMenuItemSelect }: MainMenuProps) {
       label: '图片编辑',
       icon: <Edit3 className="w-4 h-4" />,
       children: [
+        {
+          id: 'flux-pro',
+          label: 'FLUX.1 Kontext Pro',
+          icon: <PenTool className="w-4 h-4" />,
+          href: '/edit/pro',
+          onClick: () => console.log('Navigate to FLUX.1 Kontext Pro')
+        },
         {
           id: 'flux-max',
           label: 'FLUX.1 Kontext Max',
@@ -77,13 +84,6 @@ export function MainMenu({ className, onMenuItemSelect }: MainMenuProps) {
           icon: <Images className="w-4 h-4" />,
           href: '/edit/max-multi',
           onClick: () => console.log('Navigate to FLUX.1 Kontext Max Multi')
-        },
-        {
-          id: 'flux-pro',
-          label: 'FLUX.1 Kontext Pro',
-          icon: <PenTool className="w-4 h-4" />,
-          href: '/edit/pro',
-          onClick: () => console.log('Navigate to FLUX.1 Kontext Pro')
         }
       ]
     }

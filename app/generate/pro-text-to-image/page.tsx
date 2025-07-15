@@ -89,10 +89,9 @@ export default function ProTextToImagePage() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
         {/* 左侧：生成表单 */}
         <div className="order-1">
-          <GenerationForm 
-            onGenerate={handleGenerate} 
+          <GenerationForm
+            onGenerate={handleGenerate}
             loading={loading}
-            defaultModel="pro-text-to-image"
           />
         </div>
 
