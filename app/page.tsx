@@ -74,7 +74,7 @@ export default function HomePage() {
               <h3 className="text-sm font-medium text-blue-800">快速开始</h3>
             </div>
             <p className="text-sm text-blue-700">
-              使用顶部菜单选择您需要的功能：
+              在下方表单中选择AI模型：
               <span className="font-medium">图片生成</span> 用于文本到图像创作，
               <span className="font-medium">图片编辑</span> 用于基于参考图片的编辑和变换。
             </p>

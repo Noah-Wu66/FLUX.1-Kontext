@@ -5,6 +5,7 @@ import { Wand2, Settings, Shuffle } from 'lucide-react'
 import { Button } from './ui/Button'
 import { Input } from './ui/Input'
 import { Select } from './ui/Select'
+import { ModelSelector } from './ui/ModelSelector'
 import { Card } from './ui/Card'
 import { ImageUpload } from './ImageUpload'
 import { MultiImageUpload } from './MultiImageUpload'
@@ -43,13 +44,7 @@ const safetyToleranceOptions = [
   { value: '2', label: '标准 (2)' }
 ]
 
-const modelOptions = [
-  { value: 'max', label: 'FLUX.1 Kontext Max - 更强大的模型，处理复杂任务' },
-  { value: 'pro', label: 'FLUX.1 Kontext Pro - 专业图片编辑模型' },
-  { value: 'max-multi', label: 'FLUX.1 Kontext Max Multi - 支持多图片输入的强大模型' },
-  { value: 'max-text-to-image', label: 'FLUX.1 Kontext Max Text-to-Image - 前沿图像生成模型' },
-  { value: 'pro-text-to-image', label: 'FLUX.1 Kontext Pro Text-to-Image - 专业文本到图像生成' }
-]
+
 
 export const GenerationForm = forwardRef<GenerationFormRef, GenerationFormProps>(
   ({ onGenerate, loading = false }, ref) => {
@@ -266,11 +261,10 @@ export const GenerationForm = forwardRef<GenerationFormRef, GenerationFormProps>
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* 模型选择 */}
         <div>
-          <Select
+          <ModelSelector
             label="AI 模型"
-            options={modelOptions}
             value={model}
-            onChange={(e) => handleModelChange(e.target.value as FluxModel)}
+            onChange={handleModelChange}
             helperText="选择适合您需求的 FLUX.1 Kontext 模型"
           />
         </div>

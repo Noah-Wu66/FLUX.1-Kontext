@@ -4,7 +4,7 @@ import React from 'react'
 import Link from 'next/link'
 import { Palette, Github } from 'lucide-react'
 import { Button } from './ui/Button'
-import { MainMenu } from './MainMenu'
+
 
 export default function Header() {
   return (
@@ -22,11 +22,6 @@ export default function Header() {
                 <p className="text-xs sm:text-sm text-gray-500 hidden sm:block">AI 绘图应用</p>
               </div>
             </Link>
-          </div>
-
-          {/* 主菜单 */}
-          <div className="flex items-center mx-4">
-            <MainMenu />
           </div>
 
           {/* 右侧操作按钮 */}
