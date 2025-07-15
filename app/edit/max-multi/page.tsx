@@ -1,8 +1,8 @@
 'use client'
 
 import React, { useState, useRef } from 'react'
-import { Images } from 'lucide-react'
-import { GenerationForm } from '@/components/GenerationForm'
+import { Layers } from 'lucide-react'
+import { GenerationForm, type GenerationFormRef } from '@/components/GenerationForm'
 import { ImageGallery } from '@/components/ImageGallery'
 import { PromptPresets } from '@/components/PromptPresets'
 import { Card } from '@/components/ui/Card'
@@ -16,7 +16,7 @@ export default function MaxMultiEditPage() {
   const [currentSeed, setCurrentSeed] = useState<number>()
   const [currentModel, setCurrentModel] = useState<string>('max-multi')
   const { addToast, ToastContainer, success, error: showError } = useToast()
-  const generationFormRef = useRef<{ addToPrompt: (text: string) => void }>(null)
+  const generationFormRef = useRef<GenerationFormRef>(null)
 
   const handleGenerate = async (request: GenerationRequest) => {
     setLoading(true)
@@ -66,7 +66,7 @@ export default function MaxMultiEditPage() {
       {/* 页面标题 */}
       <div className="text-center mb-8 sm:mb-12">
         <div className="flex items-center justify-center mb-3 sm:mb-4">
-          <Images className="w-6 h-6 sm:w-8 sm:h-8 text-primary-600 mr-2" />
+          <Layers className="w-6 h-6 sm:w-8 sm:h-8 text-primary-600 mr-2" />
           <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">FLUX.1 Kontext Max Multi 多图编辑</h2>
         </div>
         <p className="text-base sm:text-lg text-gray-600 max-w-2xl mx-auto px-4">
@@ -129,7 +129,7 @@ export default function MaxMultiEditPage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
           <div className="text-center p-4 sm:p-6 bg-white rounded-xl shadow-sm border border-gray-200">
             <div className="w-10 h-10 sm:w-12 sm:h-12 bg-primary-100 rounded-lg flex items-center justify-center mx-auto mb-3 sm:mb-4">
-              <Images className="w-5 h-5 sm:w-6 sm:h-6 text-primary-600" />
+              <Layers className="w-5 h-5 sm:w-6 sm:h-6 text-primary-600" />
             </div>
             <h4 className="text-base sm:text-lg font-semibold text-gray-900 mb-2">多图处理</h4>
             <p className="text-sm sm:text-base text-gray-600">同时处理多张参考图片，理解复杂的视觉关系和场景组合</p>

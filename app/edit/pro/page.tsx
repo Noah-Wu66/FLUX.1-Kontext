@@ -2,7 +2,7 @@
 
 import React, { useState, useRef } from 'react'
 import { PenTool } from 'lucide-react'
-import { GenerationForm } from '@/components/GenerationForm'
+import { GenerationForm, type GenerationFormRef } from '@/components/GenerationForm'
 import { ImageGallery } from '@/components/ImageGallery'
 import { PromptPresets } from '@/components/PromptPresets'
 import { Card } from '@/components/ui/Card'
@@ -16,7 +16,7 @@ export default function ProEditPage() {
   const [currentSeed, setCurrentSeed] = useState<number>()
   const [currentModel, setCurrentModel] = useState<string>('pro')
   const { addToast, ToastContainer, success, error: showError } = useToast()
-  const generationFormRef = useRef<{ addToPrompt: (text: string) => void }>(null)
+  const generationFormRef = useRef<GenerationFormRef>(null)
 
   const handleGenerate = async (request: GenerationRequest) => {
     setLoading(true)

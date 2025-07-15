@@ -9,7 +9,7 @@ import {
   Sparkles,
   Zap,
   Image,
-  Images,
+  Layers,
   PenTool
 } from 'lucide-react'
 import { Menu, MenuToggle, type MenuItem } from './ui/Menu'
@@ -81,7 +81,7 @@ export function MainMenu({ className, onMenuItemSelect }: MainMenuProps) {
         {
           id: 'flux-max-multi',
           label: 'FLUX.1 Kontext Max Multi',
-          icon: <Images className="w-4 h-4" />,
+          icon: <Layers className="w-4 h-4" />,
           href: '/edit/max-multi',
           onClick: () => console.log('Navigate to FLUX.1 Kontext Max Multi')
         }
