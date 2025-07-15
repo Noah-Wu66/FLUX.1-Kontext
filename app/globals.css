@@ -47,6 +47,64 @@
 }
 
 @layer components {
+  /* 菜单组件样式 */
+  .menu {
+    position: relative;
+  }
+
+  .menu-item {
+    position: relative;
+    transition: all 0.2s ease-in-out;
+  }
+
+  .menu-item:hover {
+    transform: translateY(-1px);
+  }
+
+  .menu-item-active {
+    background-color: rgba(59, 130, 246, 0.1);
+    border-radius: 0.5rem;
+  }
+
+  .submenu {
+    animation: slideDown 0.2s ease-out;
+    transform-origin: top;
+  }
+
+  @keyframes slideDown {
+    from {
+      opacity: 0;
+      transform: translateY(-10px) scaleY(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scaleY(1);
+    }
+  }
+
+  .mobile-menu {
+    animation: slideIn 0.3s ease-out;
+  }
+
+  @keyframes slideIn {
+    from {
+      opacity: 0;
+      transform: translateY(-20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .mobile-menu-item {
+    transition: all 0.2s ease-in-out;
+  }
+
+  .mobile-menu-item:hover {
+    transform: translateX(4px);
+  }
+
   .btn-primary {
     @apply bg-primary-600 hover:bg-primary-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed;
     /* 移动端优化：确保触摸目标尺寸 */

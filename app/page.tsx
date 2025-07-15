@@ -52,48 +52,8 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen">
-      {/* 头部 */}
-      <header className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-40">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-14 sm:h-16">
-            <div className="flex items-center min-w-0 flex-1">
-              <div className="flex items-center min-w-0">
-                <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-primary-500 to-primary-600 rounded-lg flex items-center justify-center mr-2 sm:mr-3 flex-shrink-0">
-                  <Palette className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
-                </div>
-                <div className="min-w-0">
-                  <h1 className="text-lg sm:text-xl font-bold text-gray-900 truncate">FLUX.1 Kontext</h1>
-                  <p className="text-xs sm:text-sm text-gray-500 hidden sm:block">AI 绘图应用</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="flex items-center ml-4">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => window.open('https://github.com', '_blank')}
-                className="hidden sm:inline-flex"
-              >
-                <Github className="w-4 h-4 mr-2" />
-                GitHub
-              </Button>
-              {/* 移动端只显示图标 */}
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => window.open('https://github.com', '_blank')}
-                className="sm:hidden p-2"
-              >
-                <Github className="w-5 h-5" />
-              </Button>
-            </div>
-          </div>
-        </div>
-      </header>
-
       {/* 主要内容 */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
+      <div>
         {/* 介绍部分 */}
         <div className="text-center mb-8 sm:mb-12">
           <div className="flex items-center justify-center mb-3 sm:mb-4">
@@ -101,9 +61,24 @@ export default function HomePage() {
             <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">AI 图片生成</h2>
           </div>
           <p className="text-base sm:text-lg text-gray-600 max-w-2xl mx-auto px-4">
-            基于 FLUX.1 Kontext Max 模型，为您提供高质量的 AI 图片生成服务。
+            基于 FLUX.1 Kontext 模型，为您提供高质量的 AI 图片生成服务。
             支持文本到图片、图片编辑等多种功能。
           </p>
+
+          {/* 导航提示 */}
+          <div className="mt-6 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-200 max-w-3xl mx-auto">
+            <div className="flex items-center justify-center mb-2">
+              <svg className="w-5 h-5 text-blue-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <h3 className="text-sm font-medium text-blue-800">快速开始</h3>
+            </div>
+            <p className="text-sm text-blue-700">
+              使用顶部菜单选择您需要的功能：
+              <span className="font-medium">图片生成</span> 用于文本到图像创作，
+              <span className="font-medium">图片编辑</span> 用于基于参考图片的编辑和变换。
+            </p>
+          </div>
         </div>
 
         {/* 隐私安全警告 */}
@@ -176,20 +151,6 @@ export default function HomePage() {
           </div>
         </div>
       </main>
-
-      {/* 页脚 */}
-      <footer className="bg-gray-50 border-t border-gray-200 mt-12 sm:mt-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
-          <div className="text-center">
-            <p className="text-sm sm:text-base text-gray-600">
-              基于 FLUX.1 Kontext API 构建 |
-              <a href="https://fal.ai" target="_blank" rel="noopener noreferrer" className="text-primary-600 hover:text-primary-700 ml-1">
-                Powered by FAL.ai
-              </a>
-            </p>
-          </div>
-        </div>
-      </footer>
 
       {/* Toast 通知容器 */}
       <ToastContainer />
