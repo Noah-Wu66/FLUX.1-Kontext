@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { ChevronDown, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { FluxModel } from '@/lib/types'
@@ -97,8 +97,33 @@ export function ModelSelector({
 }: ModelSelectorProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
+  const [touchStart, setTouchStart] = useState<number | null>(null)
+  const [touchEnd, setTouchEnd] = useState<number | null>(null)
 
   const displayInfo = getModelDisplayInfo(value)
+
+  // 移动端键盘适配
+  useEffect(() => {
+    if (isOpen) {
+      // 防止背景滚动
+      document.body.style.overflow = 'hidden'
+      // 移动端视口适配
+      if (window.innerWidth < 768) {
+        document.body.style.position = 'fixed'
+        document.body.style.width = '100%'
+      }
+    } else {
+      document.body.style.overflow = ''
+      document.body.style.position = ''
+      document.body.style.width = ''
+    }
+
+    return () => {
+      document.body.style.overflow = ''
+      document.body.style.position = ''
+      document.body.style.width = ''
+    }
+  }, [isOpen])
 
   const handleModelSelect = (model: FluxModel) => {
     onChange(model)
@@ -114,6 +139,42 @@ export function ModelSelector({
     setSelectedCategory(null)
   }
 
+  const handleClose = () => {
+    setIsOpen(false)
+    setSelectedCategory(null)
+  }
+
+  // 处理背景点击关闭（仅桌面端）
+  const handleBackdropClick = (e: React.MouseEvent) => {
+    if (e.target === e.currentTarget && window.innerWidth >= 768) {
+      handleClose()
+    }
+  }
+
+  // 移动端滑动手势处理
+  const minSwipeDistance = 50
+
+  const onTouchStart = (e: React.TouchEvent) => {
+    setTouchEnd(null)
+    setTouchStart(e.targetTouches[0].clientY)
+  }
+
+  const onTouchMove = (e: React.TouchEvent) => {
+    setTouchEnd(e.targetTouches[0].clientY)
+  }
+
+  const onTouchEnd = () => {
+    if (!touchStart || !touchEnd) return
+
+    const distance = touchStart - touchEnd
+    const isDownSwipe = distance < -minSwipeDistance
+
+    // 向下滑动关闭弹窗（仅移动端）
+    if (isDownSwipe && window.innerWidth < 768) {
+      handleClose()
+    }
+  }
+
   return (
     <div className={cn('w-full', className)}>
       {label && (
@@ -127,20 +188,20 @@ export function ModelSelector({
         type="button"
         onClick={() => setIsOpen(true)}
         className={cn(
-          'w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors duration-200 bg-white',
+          'w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all duration-200 bg-white',
           'min-h-[44px] text-base text-left flex items-center justify-between',
-          'border-gray-300 hover:border-gray-400'
+          'border-gray-300 hover:border-gray-400 active:bg-gray-50 touch-feedback'
         )}
       >
         <div className="flex-1 min-w-0">
-          <div className="text-sm font-medium text-gray-900 truncate">
+          <div className="text-sm md:text-sm font-medium text-gray-900 truncate">
             {displayInfo.categoryName} — {displayInfo.modelName}
           </div>
-          <div className="text-xs text-gray-500 truncate">
+          <div className="text-xs md:text-xs text-gray-500 truncate mt-0.5">
             {displayInfo.description}
           </div>
         </div>
-        <ChevronDown className="w-4 h-4 text-gray-400 flex-shrink-0 ml-2" />
+        <ChevronDown className="w-4 h-4 md:w-4 md:h-4 text-gray-400 flex-shrink-0 ml-2 transition-transform duration-200" />
       </button>
 
       {helperText && (
@@ -149,48 +210,63 @@ export function ModelSelector({
 
       {/* 选择弹窗 */}
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50">
-          <div className="bg-white rounded-lg shadow-xl max-w-md w-full max-h-[80vh] overflow-hidden">
+        <div
+          className="fixed inset-0 z-50 bg-black bg-opacity-50 md:flex md:items-center md:justify-center md:p-4"
+          onClick={handleBackdropClick}
+        >
+          {/* 移动端全屏弹窗 */}
+          <div
+            className="bg-white h-full w-full md:h-auto md:max-h-[80vh] md:max-w-md md:rounded-lg md:shadow-xl overflow-hidden animate-slide-up md:animate-none flex flex-col"
+            onTouchStart={onTouchStart}
+            onTouchMove={onTouchMove}
+            onTouchEnd={onTouchEnd}
+          >
+            {/* 移动端滑动指示器 */}
+            <div className="md:hidden flex justify-center pt-2 pb-1">
+              <div className="w-8 h-1 bg-gray-300 rounded-full"></div>
+            </div>
+
             {/* 弹窗头部 */}
-            <div className="flex items-center justify-between p-4 border-b border-gray-200">
-              <h3 className="text-lg font-medium text-gray-900">
+            <div className="flex items-center justify-between p-4 md:p-4 border-b border-gray-200 bg-white sticky top-0 z-10 pt-safe">
+              <h3 className="text-lg md:text-lg font-medium text-gray-900">
                 {selectedCategory ? '选择模型' : '选择生图类型'}
               </h3>
               <button
-                onClick={() => setIsOpen(false)}
-                className="text-gray-400 hover:text-gray-600 transition-colors"
+                onClick={handleClose}
+                className="text-gray-400 hover:text-gray-600 active:text-gray-700 transition-colors p-2 -m-2 min-h-[44px] min-w-[44px] flex items-center justify-center touch-feedback"
+                aria-label="关闭"
               >
-                <X className="w-5 h-5" />
+                <X className="w-5 h-5 md:w-5 md:h-5" />
               </button>
             </div>
 
             {/* 弹窗内容 */}
-            <div className="p-4 overflow-y-auto">
+            <div className="flex-1 p-4 md:p-4 overflow-y-auto pb-safe mobile-scroll">
               {!selectedCategory ? (
                 // 显示分类列表
-                <div className="space-y-3">
+                <div className="space-y-4 md:space-y-3">
                   {modelCategories.map((category) => (
                     <button
                       key={category.id}
                       onClick={() => handleCategorySelect(category.id)}
-                      className="w-full p-3 text-left border border-gray-200 rounded-lg hover:border-primary-300 hover:bg-primary-50 transition-colors"
+                      className="w-full p-4 md:p-3 text-left border border-gray-200 rounded-lg hover:border-primary-300 hover:bg-primary-50 active:bg-primary-100 transition-all duration-200 min-h-[60px] md:min-h-[auto] flex flex-col justify-center touch-feedback"
                     >
-                      <div className="font-medium text-gray-900">{category.name}</div>
-                      <div className="text-sm text-gray-500 mt-1">{category.description}</div>
+                      <div className="font-medium text-gray-900 text-base md:text-sm">{category.name}</div>
+                      <div className="text-sm md:text-sm text-gray-500 mt-1">{category.description}</div>
                     </button>
                   ))}
                 </div>
               ) : (
                 // 显示选中分类的模型列表
-                <div className="space-y-3">
+                <div className="space-y-4 md:space-y-3">
                   {/* 返回按钮 */}
                   <button
                     onClick={handleBackToCategories}
-                    className="text-sm text-primary-600 hover:text-primary-700 mb-3"
+                    className="text-sm md:text-sm text-primary-600 hover:text-primary-700 active:text-primary-800 mb-4 md:mb-3 p-2 -m-2 min-h-[44px] flex items-center transition-all duration-200 touch-feedback"
                   >
                     ← 返回分类选择
                   </button>
-                  
+
                   {modelCategories
                     .find(cat => cat.id === selectedCategory)
                     ?.models.map((model) => (
@@ -198,14 +274,17 @@ export function ModelSelector({
                         key={model.value}
                         onClick={() => handleModelSelect(model.value)}
                         className={cn(
-                          'w-full p-3 text-left border rounded-lg transition-colors',
+                          'w-full p-4 md:p-3 text-left border rounded-lg transition-all duration-200 min-h-[60px] md:min-h-[auto] flex flex-col justify-center touch-feedback',
                           value === model.value
-                            ? 'border-primary-500 bg-primary-50'
-                            : 'border-gray-200 hover:border-primary-300 hover:bg-primary-50'
+                            ? 'border-primary-500 bg-primary-50 ring-2 ring-primary-200'
+                            : 'border-gray-200 hover:border-primary-300 hover:bg-primary-50 active:bg-primary-100'
                         )}
                       >
-                        <div className="font-medium text-gray-900">{model.name}</div>
-                        <div className="text-sm text-gray-500 mt-1">{model.description}</div>
+                        <div className="font-medium text-gray-900 text-base md:text-sm">{model.name}</div>
+                        <div className="text-sm md:text-sm text-gray-500 mt-1">{model.description}</div>
+                        {value === model.value && (
+                          <div className="text-xs text-primary-600 mt-1 font-medium">✓ 当前选中</div>
+                        )}
                       </button>
                     ))}
                 </div>
