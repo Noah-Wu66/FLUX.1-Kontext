@@ -94,6 +94,13 @@ export default function MaxEditPage() {
         </div>
       </div>
 
+      {/* 预设词 - 在移动端显示在顶部 */}
+      <div className="mb-6 lg:hidden">
+        <Card title="预设提示词" description="快速添加常用编辑指令">
+          <PromptPresets onPresetClick={handlePresetClick} />
+        </Card>
+      </div>
+
       {/* 主要布局 */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
         {/* 左侧：生成表单 */}
@@ -102,15 +109,18 @@ export default function MaxEditPage() {
             ref={generationFormRef}
             onGenerate={handleGenerate}
             loading={loading}
+            defaultPrompt="Maintain the consistency between the characters and the background."
           />
         </div>
 
         {/* 右侧：预设词和图片展示 */}
         <div className="order-2 space-y-6">
-          {/* 预设词 */}
-          <Card title="预设提示词" description="快速添加常用编辑指令">
-            <PromptPresets onPresetClick={handlePresetClick} />
-          </Card>
+          {/* 预设词 - 在桌面端显示 */}
+          <div className="hidden lg:block">
+            <Card title="预设提示词" description="快速添加常用编辑指令">
+              <PromptPresets onPresetClick={handlePresetClick} />
+            </Card>
+          </div>
 
           {/* 图片展示 */}
           <ImageGallery

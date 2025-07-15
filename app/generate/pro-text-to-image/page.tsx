@@ -86,17 +86,24 @@ export default function ProTextToImagePage() {
       </div>
 
       {/* 主要布局 */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
         {/* 左侧：生成表单 */}
-        <div className="order-1">
+        <div className="order-1 lg:col-span-2">
           <GenerationForm
+            ref={generationFormRef}
             onGenerate={handleGenerate}
             loading={loading}
           />
         </div>
 
-        {/* 右侧：图片展示 */}
-        <div className="order-2">
+        {/* 右侧：预设词和图片展示 */}
+        <div className="order-2 space-y-6">
+          {/* 预设词 */}
+          <Card title="预设提示词" description="快速添加常用创意指令">
+            <PromptPresets onPresetClick={handlePresetClick} />
+          </Card>
+
+          {/* 图片展示 */}
           <ImageGallery
             images={images}
             prompt={currentPrompt}

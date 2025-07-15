@@ -15,6 +15,7 @@ import { generateRandomSeed, getAspectRatioInfo, getImageDimensions, detectAspec
 interface GenerationFormProps {
   onGenerate: (request: GenerationRequest) => void
   loading?: boolean
+  defaultPrompt?: string
 }
 
 export interface GenerationFormRef {
@@ -39,23 +40,25 @@ const outputFormatOptions = [
 ]
 
 const safetyToleranceOptions = [
-  { value: '0', label: '最严格 (0)' },
-  { value: '1', label: '严格 (1)' },
-  { value: '2', label: '标准 (2)' }
+  { value: '1', label: '最严格 (1)' },
+  { value: '2', label: '严格 (2)' },
+  { value: '3', label: '标准 (3)' },
+  { value: '4', label: '宽松 (4)' },
+  { value: '5', label: '最宽松 (5)' }
 ]
 
 
 
 export const GenerationForm = forwardRef<GenerationFormRef, GenerationFormProps>(
-  ({ onGenerate, loading = false }, ref) => {
-  const [prompt, setPrompt] = useState('')
+  ({ onGenerate, loading = false, defaultPrompt = '' }, ref) => {
+  const [prompt, setPrompt] = useState(defaultPrompt)
   const [imageUrl, setImageUrl] = useState<string>('')
   const [imageUrls, setImageUrls] = useState<string[]>([])
   const [aspectRatio, setAspectRatio] = useState<AspectRatio>('auto')
   const [guidanceScale, setGuidanceScale] = useState(3.5)
   const [numImages, setNumImages] = useState(1)
   const [outputFormat, setOutputFormat] = useState<OutputFormat>('png')
-  const [safetyTolerance, setSafetyTolerance] = useState<SafetyTolerance>('2')
+  const [safetyTolerance, setSafetyTolerance] = useState<SafetyTolerance>('5')
   const [model, setModel] = useState<FluxModel>('max')
   const [seed, setSeed] = useState<number | undefined>(undefined)
   const [showAdvanced, setShowAdvanced] = useState(false)

@@ -4,7 +4,7 @@ export type AspectRatio = 'auto' | '21:9' | '16:9' | '4:3' | '3:2' | '1:1' | '2:
 
 export type OutputFormat = 'jpeg' | 'png'
 
-export type SafetyTolerance = '0' | '1' | '2'
+export type SafetyTolerance = '1' | '2' | '3' | '4' | '5'
 
 export type FluxModel = 'max' | 'pro' | 'max-multi' | 'max-text-to-image' | 'pro-text-to-image'
 

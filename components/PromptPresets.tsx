@@ -39,6 +39,12 @@ const presets = [
     label: '移除背景人物',
     text: 'Remove distant background people',
     category: 'editing'
+  },
+  {
+    id: 'professional-photography',
+    label: '专业摄影',
+    text: 'Transform Composition into Professional Photography',
+    category: 'editing'
   }
 ]
 
