@@ -131,7 +131,7 @@ function MenuItem({ item, orientation, onMenuItemClick }: MenuItemProps) {
           'submenu absolute z-50 bg-white rounded-lg shadow-lg border border-gray-200 py-1 mt-1 min-w-[200px]',
           orientation === 'horizontal' ? 'left-0' : 'left-full top-0'
         )}>
-          {item.children.map((child) => (
+          {item.children?.map((child) => (
             <li key={child.id} className="submenu-item">
               <button
                 onClick={() => {
