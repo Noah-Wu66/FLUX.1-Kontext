@@ -72,8 +72,6 @@ export async function POST(request: NextRequest) {
       imageBase64,
       'jpeg', // 假设是 JPEG 格式，实际可以根据 URL 或 Content-Type 判断
       {
-        model: 'gemini-2.5-flash',
-        reasoning_effort: 'medium',
         temperature: 0.8
       }
     )
