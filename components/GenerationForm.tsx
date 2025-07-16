@@ -60,7 +60,7 @@ export function GenerationForm({ onGenerate, loading = false, defaultPrompt = ''
   const [showAdvanced, setShowAdvanced] = useState(false)
 
   // 预设系统状态
-  const [usePreset, setUsePreset] = useState(true) // 默认使用预设模式
+  const [usePreset, setUsePreset] = useState(false) // 默认使用自定义提示词模式
   const [selectedPreset, setSelectedPreset] = useState<string>('')
   const [subject, setSubject] = useState<string>('')
   const [generatingPresetPrompt, setGeneratingPresetPrompt] = useState(false)
@@ -219,16 +219,30 @@ export function GenerationForm({ onGenerate, loading = false, defaultPrompt = ''
         }),
       })
 
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`)
+      }
+
       const result = await response.json()
 
       if (result.success) {
         setPrompt(result.optimizedPrompt)
       } else {
-        setErrors({ ...errors, prompt: result.error || '优化提示词失败' })
+        const errorMessage = result.error || '优化提示词失败'
+        console.error('API 返回错误:', errorMessage)
+        setErrors({ ...errors, prompt: errorMessage })
       }
     } catch (error) {
       console.error('优化提示词错误:', error)
-      setErrors({ ...errors, prompt: '网络错误，请重试' })
+      let errorMessage = '网络错误，请重试'
+      if (error instanceof Error) {
+        if (error.message.includes('500')) {
+          errorMessage = 'AI 服务暂时不可用，请稍后重试'
+        } else if (error.message.includes('401') || error.message.includes('403')) {
+          errorMessage = 'AI 服务配置错误，请联系管理员'
+        }
+      }
+      setErrors({ ...errors, prompt: errorMessage })
     } finally {
       setOptimizingPrompt(false)
     }
@@ -432,7 +446,7 @@ export function GenerationForm({ onGenerate, loading = false, defaultPrompt = ''
                 className="text-sm"
               >
                 <Sparkles className="w-4 h-4 mr-2" />
-                {optimizingPrompt ? 'AI 优化中...' : '优化提示词'}
+                {optimizingPrompt ? 'AI 优化中...' : '优化为英文提示词'}
               </Button>
             </div>
 
@@ -440,7 +454,7 @@ export function GenerationForm({ onGenerate, loading = false, defaultPrompt = ''
               <p className="mt-1 text-sm text-red-600">{errors.prompt}</p>
             )}
             <p className="mt-1 text-sm text-gray-500">
-              详细描述你想要的图片内容、风格、颜色等，或点击优化按钮让 AI 帮你完善提示词
+              详细描述你想要的图片内容、风格、颜色等，或点击优化按钮让 AI 帮你完善提示词（优化结果为英文）
             </p>
           </div>
         ) : usePreset ? (
@@ -481,28 +495,32 @@ export function GenerationForm({ onGenerate, loading = false, defaultPrompt = ''
         ) : (
           // 图片编辑模型：自定义模式
           <div>
-            <div className="flex items-center justify-between mb-2">
-              <label className="block text-sm font-medium text-gray-700">
+            <div className="relative">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
                 自定义提示词
               </label>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={handleBackToPreset}
-                disabled={loading}
-                className="text-xs"
-              >
-                返回预设模式
-              </Button>
+              <div className="relative">
+                <textarea
+                  placeholder="描述你想要的图片编辑效果..."
+                  value={prompt}
+                  onChange={(e) => setPrompt(e.target.value)}
+                  className="w-full px-3 py-2 pr-24 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors duration-200 min-h-[88px] resize-none text-base"
+                  rows={3}
+                />
+                {/* 预设模式按钮 - 右上角 */}
+                <Button
+                  type="button"
+                  variant="primary"
+                  size="sm"
+                  onClick={handleBackToPreset}
+                  disabled={loading}
+                  className="absolute top-2 right-2 text-xs font-medium bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white border-0 shadow-md hover:shadow-lg transition-all duration-200"
+                >
+                  <Wand2 className="w-3 h-3 mr-1" />
+                  预设模式
+                </Button>
+              </div>
             </div>
-            <textarea
-              placeholder="描述你想要的图片编辑效果..."
-              value={prompt}
-              onChange={(e) => setPrompt(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors duration-200 min-h-[88px] resize-none text-base"
-              rows={3}
-            />
 
             {/* 优化提示词按钮 */}
             <div className="mt-2 flex justify-center">
@@ -516,7 +534,7 @@ export function GenerationForm({ onGenerate, loading = false, defaultPrompt = ''
                 className="text-sm"
               >
                 <Sparkles className="w-4 h-4 mr-2" />
-                {optimizingPrompt ? 'AI 优化中...' : '优化提示词'}
+                {optimizingPrompt ? 'AI 优化中...' : '优化为英文提示词'}
               </Button>
             </div>
 
@@ -524,7 +542,7 @@ export function GenerationForm({ onGenerate, loading = false, defaultPrompt = ''
               <p className="mt-1 text-sm text-red-600">{errors.prompt}</p>
             )}
             <p className="mt-1 text-sm text-gray-500">
-              详细描述你想要的图片编辑效果，或点击优化按钮让 AI 帮你完善提示词
+              详细描述你想要的图片编辑效果，或点击优化按钮让 AI 帮你完善提示词（优化结果为英文）。也可以点击右上角的预设模式按钮使用 AI 预设。
             </p>
           </div>
         )}
@@ -560,8 +578,8 @@ export function GenerationForm({ onGenerate, loading = false, defaultPrompt = ''
                     : '预设模式需要上传参考图片，AI 将分析图片内容生成编辑指令'
                 ) : (
                   model === 'max-multi'
-                    ? '上传多张参考图片可以帮助 AI 更好地理解复杂的需求和场景'
-                    : '上传参考图片可以帮助 AI 更好地理解你的需求'
+                    ? '上传多张参考图片可以帮助 AI 更好地理解复杂的需求和场景。也可以使用预设模式让 AI 自动分析图片。'
+                    : '上传参考图片可以帮助 AI 更好地理解你的需求。也可以使用预设模式让 AI 自动分析图片。'
                 )}
               </p>
               {aspectRatio === 'auto' && (

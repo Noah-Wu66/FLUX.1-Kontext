@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { geminiAPI } from '@/lib/gemini-api'
 import { buildPresetPrompt, getPresetByName } from '@/lib/presets'
-import { GeminiUtils } from '@/lib/gemini'
+import GeminiUtils from '@/lib/gemini-utils'
 
 interface GeneratePresetPromptRequest {
   presetName: string

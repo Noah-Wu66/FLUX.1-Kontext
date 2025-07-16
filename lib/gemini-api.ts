@@ -34,7 +34,15 @@ export class GeminiAPI {
    * 检查 API 配置是否有效
    */
   isConfigured(): boolean {
-    return !!this.config.apiKey
+    const isConfigured = !!this.config.apiKey && this.config.apiKey.trim() !== ''
+    if (!isConfigured) {
+      console.warn('Gemini API 配置检查失败:', {
+        hasApiKey: !!this.config.apiKey,
+        apiKeyLength: this.config.apiKey?.length || 0,
+        baseUrl: this.config.baseUrl
+      })
+    }
+    return isConfigured
   }
 
   /**
@@ -52,9 +60,16 @@ export class GeminiAPI {
       if (!this.isConfigured()) {
         return {
           success: false,
-          error: 'OpenAI API 密钥未配置'
+          error: 'Gemini API 密钥未配置，请检查 OPENAI_API_KEY 环境变量'
         }
       }
+
+      console.log('发送 Gemini API 请求:', {
+        model,
+        messageCount: messages.length,
+        options,
+        baseUrl: this.config.baseUrl
+      })
 
       const response = await this.client.chat.completions.create({
         model,
@@ -63,15 +78,42 @@ export class GeminiAPI {
         ...(options?.temperature && { temperature: options.temperature })
       })
 
+      console.log('Gemini API 响应成功:', {
+        model,
+        choices: response.choices?.length || 0,
+        usage: response.usage
+      })
+
       return {
         success: true,
         data: response
       }
     } catch (error) {
-      console.error('Gemini 聊天请求失败:', error)
+      console.error('Gemini 聊天请求失败:', {
+        error: error instanceof Error ? error.message : String(error),
+        model,
+        messageCount: messages.length,
+        stack: error instanceof Error ? error.stack : undefined
+      })
+
+      let errorMessage = '未知错误'
+      if (error instanceof Error) {
+        errorMessage = error.message
+        // 提供更友好的错误信息
+        if (error.message.includes('401')) {
+          errorMessage = 'API 密钥无效，请检查配置'
+        } else if (error.message.includes('403')) {
+          errorMessage = 'API 访问被拒绝，请检查权限'
+        } else if (error.message.includes('429')) {
+          errorMessage = 'API 请求频率过高，请稍后重试'
+        } else if (error.message.includes('500')) {
+          errorMessage = 'AI 服务暂时不可用，请稍后重试'
+        }
+      }
+
       return {
         success: false,
-        error: error instanceof Error ? error.message : '未知错误'
+        error: errorMessage
       }
     }
   }

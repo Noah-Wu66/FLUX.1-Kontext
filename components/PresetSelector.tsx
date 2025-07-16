@@ -91,14 +91,14 @@ export function PresetSelector({
       <div className="flex justify-center">
         <Button
           type="button"
-          variant="outline"
+          variant="primary"
           size="sm"
           onClick={onCustomMode}
           disabled={disabled || loading}
-          className="text-gray-600 hover:text-gray-800"
+          className="bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white border-0 shadow-md hover:shadow-lg transition-all duration-200"
         >
           <Edit3 className="w-4 h-4 mr-2" />
-          切换到自定义提示词
+          自定义提示词
         </Button>
       </div>
 

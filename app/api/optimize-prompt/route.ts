@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { GeminiUtils } from '@/lib/gemini'
+import GeminiUtils from '@/lib/gemini-utils'
 
 interface OptimizePromptRequest {
   prompt: string
@@ -9,7 +9,7 @@ interface OptimizePromptRequest {
 export async function POST(request: NextRequest) {
   try {
     const body: OptimizePromptRequest = await request.json()
-    
+
     // 验证必需字段
     if (!body.prompt || !body.prompt.trim()) {
       return NextResponse.json(
@@ -25,28 +25,37 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // 检查环境变量配置
+    if (!process.env.OPENAI_API_KEY) {
+      console.error('OPENAI_API_KEY 环境变量未配置')
+      return NextResponse.json(
+        { success: false, error: 'AI 服务未配置，请联系管理员' },
+        { status: 500 }
+      )
+    }
+
     // 构建优化提示词的系统提示
-    const systemPrompt = `你是一个专业的 AI 图像生成提示词优化专家，专门为 FLUX.1 Kontext 模型优化提示词。
+    const systemPrompt = `You are a professional AI image generation prompt optimization expert, specializing in optimizing prompts for FLUX.1 Kontext models.
 
-你的任务是优化用户提供的提示词，使其更适合 FLUX.1 Kontext 模型生成高质量图片。
+Your task is to optimize the user's prompt to make it more suitable for FLUX.1 Kontext models to generate high-quality images.
 
-优化原则：
-1. 保持用户原意不变
-2. 添加具体的视觉描述细节
-3. 使用 FLUX 模型理解的专业术语
-4. 优化语言结构和词汇选择
-5. 添加适当的风格、光照、构图描述
-6. 确保提示词清晰、具体、富有表现力
+Optimization principles:
+1. Maintain the user's original intent
+2. Add specific visual description details
+3. Use professional terminology that FLUX models understand
+4. Optimize language structure and vocabulary choices
+5. Add appropriate style, lighting, and composition descriptions
+6. Ensure prompts are clear, specific, and expressive
 
-模型类型：${body.model}
-${body.model.includes('text-to-image') ? 
-  '- 这是文生图模型，重点优化场景描述、风格、构图等' : 
-  '- 这是图片编辑模型，重点优化编辑指令的清晰度和具体性'
+Model type: ${body.model}
+${body.model.includes('text-to-image') ?
+  '- This is a text-to-image model, focus on optimizing scene descriptions, styles, compositions, etc.' :
+  '- This is an image editing model, focus on optimizing the clarity and specificity of editing instructions'
 }
 
-请直接输出优化后的提示词，不要添加任何解释或额外文字。`
+IMPORTANT: You must output the optimized prompt in English only. Do not add any explanations or additional text.`
 
-    const userPrompt = `请优化以下提示词：
+    const userPrompt = `Please optimize the following prompt (translate to English if needed and optimize):
 
 ${body.prompt.trim()}`
 
@@ -67,14 +76,22 @@ ${body.prompt.trim()}`
         originalPrompt: body.prompt.trim()
       })
     } else {
-      console.error('Gemini API 调用失败:', result.error)
+      const errorMessage = result.error || 'AI 优化失败'
+      console.error('Gemini API 调用失败:', {
+        error: errorMessage,
+        prompt: body.prompt.substring(0, 100) + '...',
+        model: body.model
+      })
       return NextResponse.json(
-        { success: false, error: result.error || 'AI 优化失败' },
+        { success: false, error: errorMessage },
         { status: 500 }
       )
     }
   } catch (error) {
-    console.error('优化提示词错误:', error)
+    console.error('优化提示词错误:', {
+      error: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined
+    })
     return NextResponse.json(
       { success: false, error: '服务器内部错误' },
       { status: 500 }
