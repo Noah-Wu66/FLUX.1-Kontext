@@ -58,6 +58,9 @@ export interface GenerationRequest {
   safetyTolerance: SafetyTolerance
   seed?: number
   model: FluxModel
+  usePreset?: boolean // 是否使用预设模式
+  presetName?: string // 预设名称
+  subject?: string // 预设中的主体（用于 Zoom 等预设）
 }
 
 export interface GenerationResult {
@@ -72,3 +75,9 @@ export interface QueueStatus {
   logs?: Array<{ message: string }>
   progress?: number
 }
+
+// 导出 Gemini 相关类型
+export * from './gemini-types'
+
+// 导出预设系统相关类型
+export * from './presets'
