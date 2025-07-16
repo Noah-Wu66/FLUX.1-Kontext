@@ -2,8 +2,8 @@
 
 import React from 'react'
 import Link from 'next/link'
-import { Palette, Github } from 'lucide-react'
-import { Button } from './ui/Button'
+import { Palette } from 'lucide-react'
+
 
 
 export default function Header() {
@@ -24,27 +24,7 @@ export default function Header() {
             </Link>
           </div>
 
-          {/* 右侧操作按钮 */}
-          <div className="flex items-center ml-4">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => window.open('https://github.com', '_blank')}
-              className="hidden sm:inline-flex"
-            >
-              <Github className="w-4 h-4 mr-2" />
-              GitHub
-            </Button>
-            {/* 移动端只显示图标 */}
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => window.open('https://github.com', '_blank')}
-              className="sm:hidden p-2"
-            >
-              <Github className="w-5 h-5" />
-            </Button>
-          </div>
+
         </div>
       </div>
     </header>

@@ -107,39 +107,7 @@ export default function MaxTextToImagePage() {
         </div>
       </div>
 
-      {/* 功能特点 */}
-      <div className="mt-12 sm:mt-16">
-        <h3 className="text-xl sm:text-2xl font-bold text-gray-900 text-center mb-6 sm:mb-8">Max Text-to-Image 特点</h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-          <div className="text-center p-4 sm:p-6 bg-white rounded-xl shadow-sm border border-gray-200">
-            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-primary-100 rounded-lg flex items-center justify-center mx-auto mb-3 sm:mb-4">
-              <Sparkles className="w-5 h-5 sm:w-6 sm:h-6 text-primary-600" />
-            </div>
-            <h4 className="text-base sm:text-lg font-semibold text-gray-900 mb-2">最高质量</h4>
-            <p className="text-sm sm:text-base text-gray-600">基于最新的 FLUX.1 Kontext Max 模型，生成业界领先的高质量图像</p>
-          </div>
 
-          <div className="text-center p-4 sm:p-6 bg-white rounded-xl shadow-sm border border-gray-200">
-            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-green-100 rounded-lg flex items-center justify-center mx-auto mb-3 sm:mb-4">
-              <svg className="w-5 h-5 sm:w-6 sm:h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-              </svg>
-            </div>
-            <h4 className="text-base sm:text-lg font-semibold text-gray-900 mb-2">创意表现</h4>
-            <p className="text-sm sm:text-base text-gray-600">强大的创意理解能力，能够准确表达复杂的艺术概念和风格</p>
-          </div>
-
-          <div className="text-center p-4 sm:p-6 bg-white rounded-xl shadow-sm border border-gray-200 sm:col-span-2 lg:col-span-1">
-            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-purple-100 rounded-lg flex items-center justify-center mx-auto mb-3 sm:mb-4">
-              <svg className="w-5 h-5 sm:w-6 sm:h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-              </svg>
-            </div>
-            <h4 className="text-base sm:text-lg font-semibold text-gray-900 mb-2">纯文本生成</h4>
-            <p className="text-sm sm:text-base text-gray-600">专为文本到图像生成优化，无需参考图片即可创造精美作品</p>
-          </div>
-        </div>
-      </div>
 
       {/* Toast 通知容器 */}
       <ToastContainer />

@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useMemo, forwardRef, useImperativeHandle } from 'react'
+import React, { useState, useMemo } from 'react'
 import { Wand2, Settings, Shuffle } from 'lucide-react'
 import { Button } from './ui/Button'
 import { Input } from './ui/Input'
@@ -16,10 +16,6 @@ interface GenerationFormProps {
   onGenerate: (request: GenerationRequest) => void
   loading?: boolean
   defaultPrompt?: string
-}
-
-export interface GenerationFormRef {
-  addToPrompt: (text: string) => void
 }
 
 const baseAspectRatioOptions = [
@@ -49,8 +45,7 @@ const safetyToleranceOptions = [
 
 
 
-export const GenerationForm = forwardRef<GenerationFormRef, GenerationFormProps>(
-  ({ onGenerate, loading = false, defaultPrompt = '' }, ref) => {
+export function GenerationForm({ onGenerate, loading = false, defaultPrompt = '' }: GenerationFormProps) {
   const [prompt, setPrompt] = useState(defaultPrompt)
   const [imageUrl, setImageUrl] = useState<string>('')
   const [imageUrls, setImageUrls] = useState<string[]>([])
@@ -69,23 +64,7 @@ export const GenerationForm = forwardRef<GenerationFormRef, GenerationFormProps>
   const [imageDimensions, setImageDimensions] = useState<{ width: number; height: number } | null>(null)
   const [isDetecting, setIsDetecting] = useState(false)
 
-  // 暴露给父组件的方法
-  useImperativeHandle(ref, () => ({
-    addToPrompt: (text: string) => {
-      setPrompt(prev => {
-        const trimmedPrev = prev.trim()
-        if (trimmedPrev === '') {
-          return text
-        }
-        // 如果已经包含这个文本，就不重复添加
-        if (trimmedPrev.includes(text)) {
-          return prev
-        }
-        // 添加文本，用逗号分隔
-        return `${trimmedPrev}, ${text}`
-      })
-    }
-  }), [])
+
 
   // 根据模型类型动态生成比例选项
   const aspectRatioOptions = useMemo(() => {
@@ -472,6 +451,4 @@ export const GenerationForm = forwardRef<GenerationFormRef, GenerationFormProps>
       </form>
     </Card>
   )
-})
-
-GenerationForm.displayName = 'GenerationForm'
+}

@@ -107,39 +107,7 @@ export default function ProTextToImagePage() {
         </div>
       </div>
 
-      {/* 功能特点 */}
-      <div className="mt-12 sm:mt-16">
-        <h3 className="text-xl sm:text-2xl font-bold text-gray-900 text-center mb-6 sm:mb-8">Pro Text-to-Image 特点</h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-          <div className="text-center p-4 sm:p-6 bg-white rounded-xl shadow-sm border border-gray-200">
-            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-primary-100 rounded-lg flex items-center justify-center mx-auto mb-3 sm:mb-4">
-              <Zap className="w-5 h-5 sm:w-6 sm:h-6 text-primary-600" />
-            </div>
-            <h4 className="text-base sm:text-lg font-semibold text-gray-900 mb-2">高效生成</h4>
-            <p className="text-sm sm:text-base text-gray-600">优化的性能表现，比Max模型更快的生成速度，适合快速迭代</p>
-          </div>
 
-          <div className="text-center p-4 sm:p-6 bg-white rounded-xl shadow-sm border border-gray-200">
-            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-green-100 rounded-lg flex items-center justify-center mx-auto mb-3 sm:mb-4">
-              <svg className="w-5 h-5 sm:w-6 sm:h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-            </div>
-            <h4 className="text-base sm:text-lg font-semibold text-gray-900 mb-2">资源优化</h4>
-            <p className="text-sm sm:text-base text-gray-600">更低的计算资源需求，适合大批量图像生成和资源受限场景</p>
-          </div>
-
-          <div className="text-center p-4 sm:p-6 bg-white rounded-xl shadow-sm border border-gray-200 sm:col-span-2 lg:col-span-1">
-            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-purple-100 rounded-lg flex items-center justify-center mx-auto mb-3 sm:mb-4">
-              <svg className="w-5 h-5 sm:w-6 sm:h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-              </svg>
-            </div>
-            <h4 className="text-base sm:text-lg font-semibold text-gray-900 mb-2">稳定可靠</h4>
-            <p className="text-sm sm:text-base text-gray-600">更稳定的生成结果，减少失败率和不可预期的输出</p>
-          </div>
-        </div>
-      </div>
 
       {/* Toast 通知容器 */}
       <ToastContainer />

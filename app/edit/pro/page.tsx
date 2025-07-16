@@ -1,11 +1,9 @@
 'use client'
 
-import React, { useState, useRef } from 'react'
+import React, { useState } from 'react'
 import { PenTool } from 'lucide-react'
-import { GenerationForm, type GenerationFormRef } from '@/components/GenerationForm'
+import { GenerationForm } from '@/components/GenerationForm'
 import { ImageGallery } from '@/components/ImageGallery'
-import { PromptPresets } from '@/components/PromptPresets'
-import { Card } from '@/components/ui/Card'
 import { useToast } from '@/components/ui/Toast'
 import type { GenerationRequest, GeneratedImage } from '@/lib/types'
 
@@ -16,7 +14,6 @@ export default function ProEditPage() {
   const [currentSeed, setCurrentSeed] = useState<number>()
   const [currentModel, setCurrentModel] = useState<string>('pro')
   const { addToast, ToastContainer, success, error: showError } = useToast()
-  const generationFormRef = useRef<GenerationFormRef>(null)
 
   const handleGenerate = async (request: GenerationRequest) => {
     setLoading(true)
@@ -55,11 +52,7 @@ export default function ProEditPage() {
     }
   }
 
-  const handlePresetClick = (presetText: string) => {
-    if (generationFormRef.current) {
-      generationFormRef.current.addToPrompt(presetText)
-    }
-  }
+
 
   return (
     <div className="min-h-screen">
@@ -94,35 +87,20 @@ export default function ProEditPage() {
         </div>
       </div>
 
-      {/* 预设词 - 在移动端显示在顶部 */}
-      <div className="mb-6 lg:hidden">
-        <Card title="预设提示词" description="快速添加常用编辑指令">
-          <PromptPresets onPresetClick={handlePresetClick} />
-        </Card>
-      </div>
+
 
       {/* 主要布局 */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
         {/* 左侧：生成表单 */}
-        <div className="order-1 lg:col-span-2">
+        <div className="order-1">
           <GenerationForm
-            ref={generationFormRef}
             onGenerate={handleGenerate}
             loading={loading}
-            defaultPrompt="Maintain the consistency between the characters and the background."
           />
         </div>
 
-        {/* 右侧：预设词和图片展示 */}
-        <div className="order-2 space-y-6">
-          {/* 预设词 - 在桌面端显示 */}
-          <div className="hidden lg:block">
-            <Card title="预设提示词" description="快速添加常用编辑指令">
-              <PromptPresets onPresetClick={handlePresetClick} />
-            </Card>
-          </div>
-
-          {/* 图片展示 */}
+        {/* 右侧：图片展示 */}
+        <div className="order-2">
           <ImageGallery
             images={images}
             prompt={currentPrompt}
@@ -133,39 +111,7 @@ export default function ProEditPage() {
         </div>
       </div>
 
-      {/* 功能特点 */}
-      <div className="mt-12 sm:mt-16">
-        <h3 className="text-xl sm:text-2xl font-bold text-gray-900 text-center mb-6 sm:mb-8">Pro 图片编辑特点</h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-          <div className="text-center p-4 sm:p-6 bg-white rounded-xl shadow-sm border border-gray-200">
-            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-primary-100 rounded-lg flex items-center justify-center mx-auto mb-3 sm:mb-4">
-              <PenTool className="w-5 h-5 sm:w-6 sm:h-6 text-primary-600" />
-            </div>
-            <h4 className="text-base sm:text-lg font-semibold text-gray-900 mb-2">快速编辑</h4>
-            <p className="text-sm sm:text-base text-gray-600">更快的处理速度，适合需要快速迭代和多次尝试的场景</p>
-          </div>
 
-          <div className="text-center p-4 sm:p-6 bg-white rounded-xl shadow-sm border border-gray-200">
-            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-green-100 rounded-lg flex items-center justify-center mx-auto mb-3 sm:mb-4">
-              <svg className="w-5 h-5 sm:w-6 sm:h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-            </div>
-            <h4 className="text-base sm:text-lg font-semibold text-gray-900 mb-2">资源效率</h4>
-            <p className="text-sm sm:text-base text-gray-600">更低的计算资源需求，适合批量处理和资源受限环境</p>
-          </div>
-
-          <div className="text-center p-4 sm:p-6 bg-white rounded-xl shadow-sm border border-gray-200 sm:col-span-2 lg:col-span-1">
-            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-purple-100 rounded-lg flex items-center justify-center mx-auto mb-3 sm:mb-4">
-              <svg className="w-5 h-5 sm:w-6 sm:h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-              </svg>
-            </div>
-            <h4 className="text-base sm:text-lg font-semibold text-gray-900 mb-2">稳定可靠</h4>
-            <p className="text-sm sm:text-base text-gray-600">更稳定的编辑结果，减少失败率和不可预期的输出</p>
-          </div>
-        </div>
-      </div>
 
       {/* Toast 通知容器 */}
       <ToastContainer />

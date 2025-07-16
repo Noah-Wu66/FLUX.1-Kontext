@@ -1,11 +1,9 @@
 'use client'
 
-import React, { useState, useRef } from 'react'
+import React, { useState } from 'react'
 import { Layers } from 'lucide-react'
-import { GenerationForm, type GenerationFormRef } from '@/components/GenerationForm'
+import { GenerationForm } from '@/components/GenerationForm'
 import { ImageGallery } from '@/components/ImageGallery'
-import { PromptPresets } from '@/components/PromptPresets'
-import { Card } from '@/components/ui/Card'
 import { useToast } from '@/components/ui/Toast'
 import type { GenerationRequest, GeneratedImage } from '@/lib/types'
 
@@ -16,7 +14,6 @@ export default function MaxMultiEditPage() {
   const [currentSeed, setCurrentSeed] = useState<number>()
   const [currentModel, setCurrentModel] = useState<string>('max-multi')
   const { addToast, ToastContainer, success, error: showError } = useToast()
-  const generationFormRef = useRef<GenerationFormRef>(null)
 
   const handleGenerate = async (request: GenerationRequest) => {
     setLoading(true)
@@ -55,11 +52,7 @@ export default function MaxMultiEditPage() {
     }
   }
 
-  const handlePresetClick = (presetText: string) => {
-    if (generationFormRef.current) {
-      generationFormRef.current.addToPrompt(presetText)
-    }
-  }
+
 
   return (
     <div className="min-h-screen">
@@ -94,35 +87,18 @@ export default function MaxMultiEditPage() {
         </div>
       </div>
 
-      {/* 预设词 - 在移动端显示在顶部 */}
-      <div className="mb-6 lg:hidden">
-        <Card title="预设提示词" description="快速添加常用编辑指令">
-          <PromptPresets onPresetClick={handlePresetClick} />
-        </Card>
-      </div>
-
       {/* 主要布局 */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
         {/* 左侧：生成表单 */}
-        <div className="order-1 lg:col-span-2">
+        <div className="order-1">
           <GenerationForm
-            ref={generationFormRef}
             onGenerate={handleGenerate}
             loading={loading}
-            defaultPrompt="Maintain the consistency between the characters and the background."
           />
         </div>
 
-        {/* 右侧：预设词和图片展示 */}
-        <div className="order-2 space-y-6">
-          {/* 预设词 - 在桌面端显示 */}
-          <div className="hidden lg:block">
-            <Card title="预设提示词" description="快速添加常用编辑指令">
-              <PromptPresets onPresetClick={handlePresetClick} />
-            </Card>
-          </div>
-
-          {/* 图片展示 */}
+        {/* 右侧：图片展示 */}
+        <div className="order-2">
           <ImageGallery
             images={images}
             prompt={currentPrompt}
@@ -133,39 +109,7 @@ export default function MaxMultiEditPage() {
         </div>
       </div>
 
-      {/* 功能特点 */}
-      <div className="mt-12 sm:mt-16">
-        <h3 className="text-xl sm:text-2xl font-bold text-gray-900 text-center mb-6 sm:mb-8">Max Multi 多图编辑特点</h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-          <div className="text-center p-4 sm:p-6 bg-white rounded-xl shadow-sm border border-gray-200">
-            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-primary-100 rounded-lg flex items-center justify-center mx-auto mb-3 sm:mb-4">
-              <Layers className="w-5 h-5 sm:w-6 sm:h-6 text-primary-600" />
-            </div>
-            <h4 className="text-base sm:text-lg font-semibold text-gray-900 mb-2">多图处理</h4>
-            <p className="text-sm sm:text-base text-gray-600">同时处理多张参考图片，理解复杂的视觉关系和场景组合</p>
-          </div>
 
-          <div className="text-center p-4 sm:p-6 bg-white rounded-xl shadow-sm border border-gray-200">
-            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-green-100 rounded-lg flex items-center justify-center mx-auto mb-3 sm:mb-4">
-              <svg className="w-5 h-5 sm:w-6 sm:h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 4a2 2 0 114 0v1a1 1 0 001 1h3a1 1 0 011 1v3a1 1 0 01-1 1h-1a2 2 0 100 4h1a1 1 0 011 1v3a1 1 0 01-1 1h-3a1 1 0 01-1-1v-1a2 2 0 10-4 0v1a1 1 0 01-1 1H7a1 1 0 01-1-1v-3a1 1 0 00-1-1H4a1 1 0 01-1-1V9a1 1 0 011-1h1a2 2 0 100-4H4a1 1 0 01-1-1V4a1 1 0 011-1h3a1 1 0 011 1v1z" />
-              </svg>
-            </div>
-            <h4 className="text-base sm:text-lg font-semibold text-gray-900 mb-2">智能合成</h4>
-            <p className="text-sm sm:text-base text-gray-600">智能分析多张图片的特征，创造出协调统一的合成效果</p>
-          </div>
-
-          <div className="text-center p-4 sm:p-6 bg-white rounded-xl shadow-sm border border-gray-200 sm:col-span-2 lg:col-span-1">
-            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-purple-100 rounded-lg flex items-center justify-center mx-auto mb-3 sm:mb-4">
-              <svg className="w-5 h-5 sm:w-6 sm:h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-              </svg>
-            </div>
-            <h4 className="text-base sm:text-lg font-semibold text-gray-900 mb-2">创意融合</h4>
-            <p className="text-sm sm:text-base text-gray-600">将多个创意元素融合，创造出单张图片无法实现的复杂视觉效果</p>
-          </div>
-        </div>
-      </div>
 
       {/* Toast 通知容器 */}
       <ToastContainer />

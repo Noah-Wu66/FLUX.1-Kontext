@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState } from 'react'
-import { Palette, Sparkles, Github } from 'lucide-react'
+import { Sparkles, Github } from 'lucide-react'
 import { GenerationForm } from '@/components/GenerationForm'
 import { ImageGallery } from '@/components/ImageGallery'
 import { Button } from '@/components/ui/Button'
@@ -65,20 +65,7 @@ export default function HomePage() {
             支持文本到图片、图片编辑等多种功能。
           </p>
 
-          {/* 导航提示 */}
-          <div className="mt-6 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-200 max-w-3xl mx-auto">
-            <div className="flex items-center justify-center mb-2">
-              <svg className="w-5 h-5 text-blue-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              <h3 className="text-sm font-medium text-blue-800">快速开始</h3>
-            </div>
-            <p className="text-sm text-blue-700">
-              在下方表单中选择AI模型：
-              <span className="font-medium">图片生成</span> 用于文本到图像创作，
-              <span className="font-medium">图片编辑</span> 用于基于参考图片的编辑和变换。
-            </p>
-          </div>
+
         </div>
 
         {/* 隐私安全警告 */}
@@ -119,37 +106,7 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* 功能特点 */}
-        <div className="mt-12 sm:mt-16">
-          <h3 className="text-xl sm:text-2xl font-bold text-gray-900 text-center mb-6 sm:mb-8">功能特点</h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-            <div className="text-center p-4 sm:p-6 bg-white rounded-xl shadow-sm border border-gray-200">
-              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-primary-100 rounded-lg flex items-center justify-center mx-auto mb-3 sm:mb-4">
-                <Sparkles className="w-5 h-5 sm:w-6 sm:h-6 text-primary-600" />
-              </div>
-              <h4 className="text-base sm:text-lg font-semibold text-gray-900 mb-2">高质量生成</h4>
-              <p className="text-sm sm:text-base text-gray-600">基于 FLUX.1 Kontext Max 模型，生成高分辨率、高质量的图片</p>
-            </div>
 
-            <div className="text-center p-4 sm:p-6 bg-white rounded-xl shadow-sm border border-gray-200">
-              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-green-100 rounded-lg flex items-center justify-center mx-auto mb-3 sm:mb-4">
-                <Palette className="w-5 h-5 sm:w-6 sm:h-6 text-green-600" />
-              </div>
-              <h4 className="text-base sm:text-lg font-semibold text-gray-900 mb-2">多样化风格</h4>
-              <p className="text-sm sm:text-base text-gray-600">支持多种艺术风格和图片比例，满足不同创作需求</p>
-            </div>
-
-            <div className="text-center p-4 sm:p-6 bg-white rounded-xl shadow-sm border border-gray-200 sm:col-span-2 lg:col-span-1">
-              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-purple-100 rounded-lg flex items-center justify-center mx-auto mb-3 sm:mb-4">
-                <svg className="w-5 h-5 sm:w-6 sm:h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                </svg>
-              </div>
-              <h4 className="text-base sm:text-lg font-semibold text-gray-900 mb-2">快速响应</h4>
-              <p className="text-sm sm:text-base text-gray-600">优化的 API 调用，通常在 10-30 秒内完成图片生成</p>
-            </div>
-          </div>
-        </div>
       </div>
 
       {/* Toast 通知容器 */}
