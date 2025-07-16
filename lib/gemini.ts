@@ -1,5 +1,8 @@
 // Gemini 2.5 Flash 模块 - 仅用于图片分析生成提示词
 
+// 导入 API 实例
+import { geminiAPI } from './gemini-api'
+
 // 导出 API 类和实例
 export { GeminiAPI, geminiAPI } from './gemini-api'
 
