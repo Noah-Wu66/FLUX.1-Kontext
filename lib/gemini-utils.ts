@@ -10,6 +10,50 @@ import type {
 export class GeminiUtils {
 
   /**
+   * 简单文本对话 - 用于提示词优化等纯文本任务
+   */
+  static async textChat(
+    prompt: string,
+    systemMessage?: string,
+    options?: {
+      temperature?: number
+      max_tokens?: number
+    }
+  ): Promise<GeminiApiResult<string>> {
+    const messages: OpenAI.Chat.Completions.ChatCompletionMessageParam[] = []
+
+    if (systemMessage) {
+      messages.push({
+        role: 'system',
+        content: systemMessage
+      })
+    }
+
+    messages.push({
+      role: 'user',
+      content: prompt
+    })
+
+    const result = await geminiAPI.chat(
+      'gemini-2.5-flash',
+      messages,
+      options
+    )
+
+    if (result.success && result.data) {
+      return {
+        success: true,
+        data: result.data.choices[0]?.message?.content || ''
+      }
+    }
+
+    return {
+      success: false,
+      error: result.error
+    }
+  }
+
+  /**
    * 图像理解对话 - 核心功能：分析图片生成编辑提示词
    */
   static async imageChat(

@@ -5,6 +5,23 @@ export interface EditPreset {
   brief: string
 }
 
+// 预设名称中文映射
+export const PRESET_CHINESE_NAMES: Record<string, string> = {
+  'Komposer Teleport': '场景传送',
+  'Move Camera': '移动镜头',
+  'Relight': '重新打光',
+  'Product': '产品摄影',
+  'Zoom': '缩放主体',
+  'Colorize': '着色处理',
+  'Movie Poster': '电影海报',
+  'Cartoonify': '卡通化',
+  'Remove Text': '移除文字',
+  'Haircut': '改变发型',
+  'Bodybuilder': '健美化',
+  'Remove Furniture': '移除家具',
+  'Interior Design': '室内设计'
+}
+
 export interface PresetSystem {
   prefix: string
   presets: EditPreset[]
@@ -93,7 +110,7 @@ export function buildPresetPrompt(preset: EditPreset, subject?: string): string 
 export function getPresetOptions() {
   return EDIT_PRESET_SYSTEM.presets.map(preset => ({
     value: preset.name,
-    label: preset.name
+    label: PRESET_CHINESE_NAMES[preset.name] || preset.name
   }))
 }
 

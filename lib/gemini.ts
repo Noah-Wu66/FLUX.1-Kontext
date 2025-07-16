@@ -16,6 +16,7 @@ export { default as GeminiUtils } from './gemini-utils'
 export * from './gemini-types'
 
 // 导出核心方法
+export const textChat = GeminiUtils.textChat
 export const imageChat = GeminiUtils.imageChat
 export const fileToBase64 = GeminiUtils.fileToBase64
 

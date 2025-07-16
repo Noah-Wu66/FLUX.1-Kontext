@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useMemo } from 'react'
-import { Wand2, Settings, Shuffle } from 'lucide-react'
+import { Wand2, Settings, Shuffle, Sparkles } from 'lucide-react'
 import { Button } from './ui/Button'
 import { Input } from './ui/Input'
 import { Select } from './ui/Select'
@@ -64,6 +64,9 @@ export function GenerationForm({ onGenerate, loading = false, defaultPrompt = ''
   const [selectedPreset, setSelectedPreset] = useState<string>('')
   const [subject, setSubject] = useState<string>('')
   const [generatingPresetPrompt, setGeneratingPresetPrompt] = useState(false)
+
+  // 提示词优化状态
+  const [optimizingPrompt, setOptimizingPrompt] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
 
   // 自动检测相关状态
@@ -89,22 +92,20 @@ export function GenerationForm({ onGenerate, loading = false, defaultPrompt = ''
   const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {}
 
-    // 验证提示词
-    if (!prompt.trim()) {
-      if (usePreset && selectedPreset) {
-        newErrors.prompt = '请先生成预设提示词'
-      } else if (usePreset) {
-        newErrors.prompt = '请选择一个编辑预设'
-      } else {
-        newErrors.prompt = '请输入提示词'
-      }
+    // 验证提示词（仅自定义模式需要）
+    if (!usePreset && !prompt.trim()) {
+      newErrors.prompt = '请输入提示词'
     }
 
-    // 验证预设模式下的图片要求
-    if (usePreset && selectedPreset) {
-      const hasImage = model === 'max-multi' ? imageUrls.length > 0 : imageUrl
-      if (!hasImage) {
-        newErrors.prompt = '使用预设模式需要先上传参考图片'
+    // 验证预设模式下的要求
+    if (usePreset) {
+      if (!selectedPreset) {
+        newErrors.prompt = '请选择一个编辑预设'
+      } else {
+        const hasImage = model === 'max-multi' ? imageUrls.length > 0 : imageUrl
+        if (!hasImage) {
+          newErrors.prompt = '使用预设模式需要先上传参考图片'
+        }
       }
     }
 
@@ -196,8 +197,45 @@ export function GenerationForm({ onGenerate, loading = false, defaultPrompt = ''
     setPrompt('') // 清空自定义提示词
   }
 
-  // 生成预设提示词
-  const generatePresetPrompt = async () => {
+  // 优化提示词
+  const optimizePrompt = async () => {
+    if (!prompt.trim()) {
+      setErrors({ ...errors, prompt: '请先输入提示词' })
+      return
+    }
+
+    setOptimizingPrompt(true)
+    setErrors({ ...errors, prompt: '' })
+
+    try {
+      const response = await fetch('/api/optimize-prompt', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          prompt: prompt.trim(),
+          model: model
+        }),
+      })
+
+      const result = await response.json()
+
+      if (result.success) {
+        setPrompt(result.optimizedPrompt)
+      } else {
+        setErrors({ ...errors, prompt: result.error || '优化提示词失败' })
+      }
+    } catch (error) {
+      console.error('优化提示词错误:', error)
+      setErrors({ ...errors, prompt: '网络错误，请重试' })
+    } finally {
+      setOptimizingPrompt(false)
+    }
+  }
+
+  // 生成预设提示词并直接生成图片
+  const generatePresetPromptAndImage = async () => {
     if (!selectedPreset) return
 
     const referenceUrl = model === 'max-multi'
@@ -228,14 +266,39 @@ export function GenerationForm({ onGenerate, loading = false, defaultPrompt = ''
       const result = await response.json()
 
       if (result.success) {
-        setPrompt(result.prompt)
+        const generatedPrompt = result.prompt
+        setPrompt(generatedPrompt)
+
+        // 直接生成图片，不需要用户再次确认
+        const finalAspectRatio: Exclude<AspectRatio, 'auto'> = aspectRatio === 'auto'
+          ? (detectedRatio || '1:1')
+          : aspectRatio
+
+        const request: GenerationRequest = {
+          prompt: generatedPrompt,
+          aspectRatio: finalAspectRatio,
+          guidanceScale,
+          numImages,
+          outputFormat,
+          safetyTolerance,
+          model,
+          ...(model === 'max-multi' && imageUrls.length > 0 && { imageUrls }),
+          ...(model !== 'max-multi' && imageUrl && { imageUrl }),
+          ...(seed && { seed }),
+          usePreset: true,
+          presetName: selectedPreset,
+          ...(subject.trim() && { subject: subject.trim() })
+        }
+
+        setGeneratingPresetPrompt(false)
+        onGenerate(request)
       } else {
         setErrors({ ...errors, prompt: result.error || '生成预设提示词失败' })
+        setGeneratingPresetPrompt(false)
       }
     } catch (error) {
       console.error('生成预设提示词错误:', error)
       setErrors({ ...errors, prompt: '网络错误，请重试' })
-    } finally {
       setGeneratingPresetPrompt(false)
     }
   }
@@ -243,12 +306,13 @@ export function GenerationForm({ onGenerate, loading = false, defaultPrompt = ''
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    // 如果使用预设模式且还没有生成提示词，先生成提示词
-    if (usePreset && selectedPreset && !prompt.trim()) {
-      await generatePresetPrompt()
+    // 如果使用预设模式，直接生成提示词并生成图片
+    if (usePreset && selectedPreset) {
+      await generatePresetPromptAndImage()
       return
     }
 
+    // 自定义模式的验证和处理
     if (!validateForm()) {
       return
     }
@@ -355,10 +419,29 @@ export function GenerationForm({ onGenerate, loading = false, defaultPrompt = ''
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors duration-200 min-h-[88px] resize-none text-base"
               rows={3}
             />
+
+            {/* 优化提示词按钮 */}
+            <div className="mt-2 flex justify-center">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={optimizePrompt}
+                disabled={loading || optimizingPrompt || !prompt.trim()}
+                loading={optimizingPrompt}
+                className="text-sm"
+              >
+                <Sparkles className="w-4 h-4 mr-2" />
+                {optimizingPrompt ? 'AI 优化中...' : '优化提示词'}
+              </Button>
+            </div>
+
             {errors.prompt && (
               <p className="mt-1 text-sm text-red-600">{errors.prompt}</p>
             )}
-            <p className="mt-1 text-sm text-gray-500">详细描述你想要的图片内容、风格、颜色等</p>
+            <p className="mt-1 text-sm text-gray-500">
+              详细描述你想要的图片内容、风格、颜色等，或点击优化按钮让 AI 帮你完善提示词
+            </p>
           </div>
         ) : usePreset ? (
           // 图片编辑模型：预设模式
@@ -389,17 +472,7 @@ export function GenerationForm({ onGenerate, loading = false, defaultPrompt = ''
               </div>
             )}
 
-            {/* 生成的提示词预览 */}
-            {prompt && (
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  AI 生成的编辑指令
-                </label>
-                <div className="p-3 bg-gray-50 border border-gray-200 rounded-lg">
-                  <p className="text-sm text-gray-700 whitespace-pre-wrap">{prompt}</p>
-                </div>
-              </div>
-            )}
+
 
             {errors.prompt && (
               <p className="text-sm text-red-600">{errors.prompt}</p>
@@ -430,10 +503,29 @@ export function GenerationForm({ onGenerate, loading = false, defaultPrompt = ''
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors duration-200 min-h-[88px] resize-none text-base"
               rows={3}
             />
+
+            {/* 优化提示词按钮 */}
+            <div className="mt-2 flex justify-center">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={optimizePrompt}
+                disabled={loading || optimizingPrompt || !prompt.trim()}
+                loading={optimizingPrompt}
+                className="text-sm"
+              >
+                <Sparkles className="w-4 h-4 mr-2" />
+                {optimizingPrompt ? 'AI 优化中...' : '优化提示词'}
+              </Button>
+            </div>
+
             {errors.prompt && (
               <p className="mt-1 text-sm text-red-600">{errors.prompt}</p>
             )}
-            <p className="mt-1 text-sm text-gray-500">详细描述你想要的图片编辑效果</p>
+            <p className="mt-1 text-sm text-gray-500">
+              详细描述你想要的图片编辑效果，或点击优化按钮让 AI 帮你完善提示词
+            </p>
           </div>
         )}
 
@@ -612,15 +704,15 @@ export function GenerationForm({ onGenerate, loading = false, defaultPrompt = ''
         <div className="flex justify-center pt-2">
           <Button
             type="submit"
-            loading={loading || generatingPresetPrompt}
-            disabled={loading || generatingPresetPrompt || (usePreset && !selectedPreset)}
+            loading={loading || generatingPresetPrompt || optimizingPrompt}
+            disabled={loading || generatingPresetPrompt || optimizingPrompt || (usePreset && !selectedPreset)}
             size="lg"
             className="w-full sm:w-auto min-w-[200px]"
           >
             <Wand2 className="w-5 h-5 mr-2" />
             {loading ? '生成中...' :
-             generatingPresetPrompt ? '分析图片中...' :
-             usePreset && selectedPreset && !prompt.trim() ? '生成编辑指令' :
+             generatingPresetPrompt ? 'AI 分析中...' :
+             optimizingPrompt ? 'AI 优化中...' :
              '生成图片'}
           </Button>
         </div>

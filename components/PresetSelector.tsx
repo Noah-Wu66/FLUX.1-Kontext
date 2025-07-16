@@ -3,7 +3,7 @@
 import React, { useState } from 'react'
 import { ChevronDown, Wand2, Edit3 } from 'lucide-react'
 import { Button } from './ui/Button'
-import { getPresetOptions, getPresetByName } from '@/lib/presets'
+import { getPresetOptions, getPresetByName, PRESET_CHINESE_NAMES } from '@/lib/presets'
 
 interface PresetSelectorProps {
   onPresetSelect: (presetName: string) => void
@@ -57,7 +57,7 @@ export function PresetSelector({
             <div className="flex items-center">
               <Wand2 className="w-4 h-4 text-primary-600 mr-2" />
               <span className="text-gray-900">
-                {selectedPresetData ? selectedPresetData.name : '选择编辑预设...'}
+                {selectedPresetData ? (PRESET_CHINESE_NAMES[selectedPresetData.name] || selectedPresetData.name) : '选择编辑预设...'}
               </span>
             </div>
             <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
@@ -66,41 +66,25 @@ export function PresetSelector({
           {/* 下拉菜单 */}
           {isOpen && (
             <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-y-auto">
-              {presetOptions.map((option) => {
-                const preset = getPresetByName(option.value)
-                return (
-                  <button
-                    key={option.value}
-                    type="button"
-                    onClick={() => handlePresetClick(option.value)}
-                    className={`
-                      w-full px-4 py-3 text-left hover:bg-primary-50 transition-colors duration-150
-                      border-b border-gray-100 last:border-b-0
-                      ${selectedPreset === option.value ? 'bg-primary-50 text-primary-700' : 'text-gray-900'}
-                    `}
-                  >
-                    <div className="font-medium">{option.label}</div>
-                    {preset && (
-                      <div className="text-sm text-gray-500 mt-1 line-clamp-2">
-                        {preset.brief}
-                      </div>
-                    )}
-                  </button>
-                )
-              })}
+              {presetOptions.map((option) => (
+                <button
+                  key={option.value}
+                  type="button"
+                  onClick={() => handlePresetClick(option.value)}
+                  className={`
+                    w-full px-4 py-3 text-left hover:bg-primary-50 transition-colors duration-150
+                    border-b border-gray-100 last:border-b-0
+                    ${selectedPreset === option.value ? 'bg-primary-50 text-primary-700' : 'text-gray-900'}
+                  `}
+                >
+                  <div className="font-medium">{option.label}</div>
+                </button>
+              ))}
             </div>
           )}
         </div>
 
-        {/* 预设描述 */}
-        {selectedPresetData && (
-          <div className="mt-2 p-3 bg-primary-50 rounded-lg border border-primary-200">
-            <p className="text-sm text-primary-700">
-              <span className="font-medium">预设说明：</span>
-              {selectedPresetData.brief}
-            </p>
-          </div>
-        )}
+
       </div>
 
       {/* 自定义模式按钮 */}
