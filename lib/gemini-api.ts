@@ -1,7 +1,5 @@
 import OpenAI from 'openai'
 import type {
-  GeminiChatRequest,
-  GeminiChatResponse,
   GeminiConfig,
   GeminiApiResult
 } from './gemini-types'
@@ -40,9 +38,16 @@ export class GeminiAPI {
   }
 
   /**
-   * 聊天对话 - 基础版本
+   * 聊天对话 - 基础版本，直接使用 OpenAI 类型
    */
-  async chat(request: GeminiChatRequest): Promise<GeminiApiResult<GeminiChatResponse>> {
+  async chat(
+    model: string,
+    messages: OpenAI.Chat.Completions.ChatCompletionMessageParam[],
+    options?: {
+      temperature?: number
+      max_tokens?: number
+    }
+  ): Promise<GeminiApiResult<OpenAI.Chat.Completions.ChatCompletion>> {
     try {
       if (!this.isConfigured()) {
         return {
@@ -52,15 +57,15 @@ export class GeminiAPI {
       }
 
       const response = await this.client.chat.completions.create({
-        model: request.model,
-        messages: request.messages,
-        ...(request.max_tokens && { max_tokens: request.max_tokens }),
-        ...(request.temperature && { temperature: request.temperature })
+        model,
+        messages,
+        ...(options?.max_tokens && { max_tokens: options.max_tokens }),
+        ...(options?.temperature && { temperature: options.temperature })
       })
 
       return {
         success: true,
-        data: response as GeminiChatResponse
+        data: response
       }
     } catch (error) {
       console.error('Gemini 聊天请求失败:', error)

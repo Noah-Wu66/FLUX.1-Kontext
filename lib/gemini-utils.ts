@@ -1,7 +1,6 @@
+import OpenAI from 'openai'
 import { geminiAPI } from './gemini-api'
 import type {
-  GeminiMessage,
-  GeminiChatRequest,
   GeminiApiResult
 } from './gemini-types'
 
@@ -22,7 +21,7 @@ export class GeminiUtils {
       max_tokens?: number
     }
   ): Promise<GeminiApiResult<string>> {
-    const messages: GeminiMessage[] = [
+    const messages: OpenAI.Chat.Completions.ChatCompletionMessageParam[] = [
       {
         role: 'user',
         content: [
@@ -40,22 +39,19 @@ export class GeminiUtils {
       }
     ]
 
-    const request: GeminiChatRequest = {
-      model: 'gemini-2.5-flash',
+    const result = await geminiAPI.chat(
+      'gemini-2.5-flash',
       messages,
-      ...(options?.temperature && { temperature: options.temperature }),
-      ...(options?.max_tokens && { max_tokens: options.max_tokens })
-    }
+      options
+    )
 
-    const result = await geminiAPI.chat(request)
-    
     if (result.success && result.data) {
       return {
         success: true,
         data: result.data.choices[0]?.message?.content || ''
       }
     }
-    
+
     return {
       success: false,
       error: result.error
