@@ -103,7 +103,7 @@ export function PresetSelector({
       </div>
 
       <p className="text-xs text-gray-500 text-center">
-        选择预设后，AI 将分析您的图片并自动生成相应的编辑指令
+        选择预设后，AI 将自动生成相应的编辑指令
       </p>
     </div>
   )

@@ -492,12 +492,9 @@ export function GenerationForm({ onGenerate, loading = false, defaultPrompt = ''
                 />
                 <label htmlFor="enableOptimization" className="text-sm font-medium text-gray-700">
                   <Sparkles className="w-4 h-4 inline mr-1" />
-                  生成时自动优化提示词
+                  优化提示词
                 </label>
               </div>
-              <p className="text-xs text-gray-500 ml-6 mt-1">
-                AI 将按照 Kontext 最佳实践优化您的描述，生成详细的场景、风格和构图指令
-              </p>
             </div>
 
             {errors.prompt && (
@@ -505,8 +502,8 @@ export function GenerationForm({ onGenerate, loading = false, defaultPrompt = ''
             )}
             <p className="mt-1 text-sm text-gray-500">
               {model.includes('text-to-image')
-                ? '描述您想要生成的图片（可以很简单）。启用自动优化后，AI 将按照 Kontext 专业标准生成详细的场景、风格和构图描述。'
-                : '详细描述你想要的图片内容、风格、颜色等。启用自动优化后，AI 将按照 Kontext 专业标准完善您的提示词。'
+                ? '描述您想要生成的图片（可以很简单）。'
+                : '详细描述你想要的图片内容、风格、颜色等。'
               }
             </p>
           </div>
@@ -587,22 +584,16 @@ export function GenerationForm({ onGenerate, loading = false, defaultPrompt = ''
                 />
                 <label htmlFor="enableOptimization2" className="text-sm font-medium text-gray-700">
                   <Sparkles className="w-4 h-4 inline mr-1" />
-                  生成时自动优化提示词
+                  优化提示词
                 </label>
               </div>
-              <p className="text-xs text-gray-500 ml-6 mt-1">
-                {model === 'max-multi'
-                  ? 'AI 将分析所有图片内容，按照 Kontext 多图互动编辑最佳实践，生成图片间元素融合的精确指令'
-                  : 'AI 将分析图片内容，按照 Kontext 最佳实践优化您的提示词，确保精确控制和元素保持'
-                }
-              </p>
             </div>
 
             {errors.prompt && (
               <p className="mt-1 text-sm text-red-600">{errors.prompt}</p>
             )}
             <p className="mt-1 text-sm text-gray-500">
-              描述您想要的编辑效果（可以很简单）。启用自动优化后，AI 将按照 Kontext 专业标准分析图片并生成精确的编辑指令。也可以点击右上角的预设模式按钮使用 AI 预设。
+              描述您想要的编辑效果（可以很简单）。也可以点击右上角的预设模式按钮使用 AI 预设。
             </p>
           </div>
         )}
@@ -634,12 +625,12 @@ export function GenerationForm({ onGenerate, loading = false, defaultPrompt = ''
               <p className="text-xs text-gray-500">
                 {usePreset ? (
                   model === 'max-multi'
-                    ? '预设模式需要上传参考图片，AI 将分析图片内容生成编辑指令'
-                    : '预设模式需要上传参考图片，AI 将分析图片内容生成编辑指令'
+                    ? '预设模式需要上传参考图片'
+                    : '预设模式需要上传参考图片'
                 ) : (
                   model === 'max-multi'
-                    ? '上传多张参考图片可以帮助 AI 更好地理解复杂的需求和场景。也可以使用预设模式让 AI 自动分析图片。'
-                    : '上传参考图片可以帮助 AI 更好地理解你的需求。也可以使用预设模式让 AI 自动分析图片。'
+                    ? '上传多张参考图片可以帮助 AI 更好地理解复杂的需求和场景。也可以使用预设模式。'
+                    : '上传参考图片可以帮助 AI 更好地理解你的需求。也可以使用预设模式。'
                 )}
               </p>
               {aspectRatio === 'auto' && (
