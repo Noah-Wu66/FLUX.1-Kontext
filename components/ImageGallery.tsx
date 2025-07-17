@@ -99,7 +99,16 @@ export function ImageGallery({ images, prompt, seed, model, loading = false }: I
     <>
       <Card
         title="生成结果"
-        description={`使用 ${model?.toUpperCase() || 'FLUX.1'} 模型，基于提示词"${prompt}"生成了 ${images.length} 张图片${seed ? ` (种子: ${seed})` : ''}`}
+        description={
+          <div>
+            {/* 移动端简单描述 */}
+            <span className="pc:hidden">已生成 {images.length} 张图片</span>
+            {/* PC端详细描述 */}
+            <span className="hidden pc:inline">
+              使用 {model?.toUpperCase() || 'FLUX.1'} 模型，基于提示词"{prompt}"生成了 {images.length} 张图片{seed ? ` (种子: ${seed})` : ''}
+            </span>
+          </div>
+        }
       >
         <div className={`grid gap-4 pc:gap-6 ${images.length === 1 ? 'grid-cols-1' : 'grid-cols-1 pc:grid-cols-2'}`}>
           {images.map((image, index) => (

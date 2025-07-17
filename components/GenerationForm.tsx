@@ -55,7 +55,7 @@ export function GenerationForm({ onGenerate, loading = false, defaultPrompt = ''
   const [numImages, setNumImages] = useState(1)
   const [outputFormat, setOutputFormat] = useState<OutputFormat>('png')
   const [safetyTolerance, setSafetyTolerance] = useState<SafetyTolerance>('5')
-  const [model, setModel] = useState<FluxModel>('max')
+  const [model, setModel] = useState<FluxModel>('pro')
   const [seed, setSeed] = useState<number | undefined>(undefined)
   const [showAdvanced, setShowAdvanced] = useState(false)
 
@@ -683,42 +683,33 @@ export function GenerationForm({ onGenerate, loading = false, defaultPrompt = ''
           </div>
         )}
 
-        {/* 基础设置 */}
-        <div className="space-y-4 pc:space-y-0 pc:grid pc:grid-cols-2 pc:gap-6">
-          <div>
-            <Select
-              label="图片比例"
-              options={aspectRatioOptions}
-              value={aspectRatio}
-              onChange={(e) => handleAspectRatioChange(e.target.value as AspectRatio)}
-              helperText={
-                // 文生图模型的帮助文本
-                (model === 'max-text-to-image' || model === 'pro-text-to-image')
-                  ? `${aspectRatioInfo.width} × ${aspectRatioInfo.height} 像素 - 文生图模型推荐手动选择比例`
-                  : aspectRatio === 'auto'
-                    ? (model === 'max-multi' ? imageUrls.length > 0 : imageUrl)
-                      ? detectedRatio
-                        ? `自动检测: ${getAspectRatioInfo(detectedRatio).label}`
-                        : '等待检测图片比例'
-                      : '默认使用正方形 (1:1)'
-                    : `${aspectRatioInfo.width} × ${aspectRatioInfo.height} 像素`
-              }
-            />
-          </div>
+        {/* 基础设置 - 仅对图片生成模型显示图片比例和数量 */}
+        {(model === 'max-text-to-image' || model === 'pro-text-to-image') && (
+          <div className="space-y-4 pc:space-y-0 pc:grid pc:grid-cols-2 pc:gap-6">
+            <div>
+              <Select
+                label="图片比例"
+                options={aspectRatioOptions}
+                value={aspectRatio}
+                onChange={(e) => handleAspectRatioChange(e.target.value as AspectRatio)}
+                helperText={`${aspectRatioInfo.width} × ${aspectRatioInfo.height} 像素 - 文生图模型推荐手动选择比例`}
+              />
+            </div>
 
-          <div>
-            <Input
-              label="图片数量"
-              type="number"
-              min="1"
-              max="4"
-              value={numImages}
-              onChange={(e) => setNumImages(parseInt(e.target.value))}
-              error={errors.numImages}
-              helperText="一次最多生成 4 张图片"
-            />
+            <div>
+              <Input
+                label="图片数量"
+                type="number"
+                min="1"
+                max="4"
+                value={numImages}
+                onChange={(e) => setNumImages(parseInt(e.target.value))}
+                error={errors.numImages}
+                helperText="一次最多生成 4 张图片"
+              />
+            </div>
           </div>
-        </div>
+        )}
 
         {/* 高级设置 */}
         <div>
@@ -734,6 +725,42 @@ export function GenerationForm({ onGenerate, loading = false, defaultPrompt = ''
 
           {showAdvanced && (
             <div className="space-y-4 pc:space-y-6 p-4 pc:p-6 bg-gray-50 rounded-lg">
+              {/* 图片编辑模型的图片比例和数量设置 */}
+              {!(model === 'max-text-to-image' || model === 'pro-text-to-image') && (
+                <div className="space-y-4 pc:space-y-0 pc:grid pc:grid-cols-2 pc:gap-6">
+                  <div>
+                    <Select
+                      label="图片比例"
+                      options={aspectRatioOptions}
+                      value={aspectRatio}
+                      onChange={(e) => handleAspectRatioChange(e.target.value as AspectRatio)}
+                      helperText={
+                        aspectRatio === 'auto'
+                          ? (model === 'max-multi' ? imageUrls.length > 0 : imageUrl)
+                            ? detectedRatio
+                              ? `自动检测: ${getAspectRatioInfo(detectedRatio).label}`
+                              : '等待检测图片比例'
+                            : '默认使用正方形 (1:1)'
+                          : `${aspectRatioInfo.width} × ${aspectRatioInfo.height} 像素`
+                      }
+                    />
+                  </div>
+
+                  <div>
+                    <Input
+                      label="图片数量"
+                      type="number"
+                      min="1"
+                      max="4"
+                      value={numImages}
+                      onChange={(e) => setNumImages(parseInt(e.target.value))}
+                      error={errors.numImages}
+                      helperText="一次最多生成 4 张图片"
+                    />
+                  </div>
+                </div>
+              )}
+
               <div className="space-y-4 pc:space-y-0 pc:grid pc:grid-cols-2 pc:gap-6">
                 <div>
                   <Input

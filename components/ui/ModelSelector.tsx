@@ -34,14 +34,14 @@ const modelCategories: ModelCategory[] = [
     description: '从文本描述生成全新图片',
     models: [
       {
-        value: 'max-text-to-image',
-        name: 'FLUX.1 Kontext Max',
-        description: '前沿图像生成模型，质量最高'
-      },
-      {
         value: 'pro-text-to-image',
         name: 'FLUX.1 Kontext Pro',
         description: '专业文本到图像生成，速度更快'
+      },
+      {
+        value: 'max-text-to-image',
+        name: 'FLUX.1 Kontext Max',
+        description: '前沿图像生成模型，质量最高'
       }
     ]
   },
@@ -51,14 +51,14 @@ const modelCategories: ModelCategory[] = [
     description: '基于参考图片进行编辑和变换',
     models: [
       {
-        value: 'max',
-        name: 'FLUX.1 Kontext Max',
-        description: '更强大的模型，处理复杂任务'
-      },
-      {
         value: 'pro',
         name: 'FLUX.1 Kontext Pro',
         description: '专业图片编辑模型'
+      },
+      {
+        value: 'max',
+        name: 'FLUX.1 Kontext Max',
+        description: '更强大的模型，处理复杂任务'
       },
       {
         value: 'max-multi',

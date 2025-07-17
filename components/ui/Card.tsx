@@ -5,7 +5,7 @@ interface CardProps {
   children: React.ReactNode
   className?: string
   title?: string
-  description?: string
+  description?: string | React.ReactNode
 }
 
 export function Card({ children, className, title, description }: CardProps) {
@@ -17,7 +17,9 @@ export function Card({ children, className, title, description }: CardProps) {
             <h3 className="text-lg pc:text-xl lg:text-2xl font-semibold text-gray-900 mb-1 pc:mb-2">{title}</h3>
           )}
           {description && (
-            <p className="text-sm pc:text-base text-gray-600 leading-relaxed">{description}</p>
+            <div className="text-sm pc:text-base text-gray-600 leading-relaxed">
+              {typeof description === 'string' ? <p>{description}</p> : description}
+            </div>
           )}
         </div>
       )}
