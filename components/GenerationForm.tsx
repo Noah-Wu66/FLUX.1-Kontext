@@ -46,28 +46,74 @@ const safetyToleranceOptions = [
 
 
 
+// 本地存储键名
+const STORAGE_KEY = 'flux-kontext-settings'
+
+// 默认设置
+const DEFAULT_SETTINGS = {
+  aspectRatio: 'auto' as AspectRatio,
+  guidanceScale: 3.5,
+  numImages: 1,
+  outputFormat: 'png' as OutputFormat,
+  safetyTolerance: '5' as SafetyTolerance,
+  model: 'pro' as FluxModel,
+  showAdvanced: false,
+  usePreset: false,
+  enableOptimization: true
+}
+
+// 从本地存储加载设置
+const loadSettings = () => {
+  if (typeof window === 'undefined') return DEFAULT_SETTINGS
+
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY)
+    if (saved) {
+      const parsed = JSON.parse(saved)
+      return { ...DEFAULT_SETTINGS, ...parsed }
+    }
+  } catch (error) {
+    console.error('加载设置失败:', error)
+  }
+  return DEFAULT_SETTINGS
+}
+
+// 保存设置到本地存储
+const saveSettings = (settings: any) => {
+  if (typeof window === 'undefined') return
+
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(settings))
+  } catch (error) {
+    console.error('保存设置失败:', error)
+  }
+}
+
 export function GenerationForm({ onGenerate, loading = false, defaultPrompt = '' }: GenerationFormProps) {
+  // 从本地存储加载初始设置
+  const initialSettings = loadSettings()
+
   const [prompt, setPrompt] = useState(defaultPrompt)
   const [imageUrl, setImageUrl] = useState<string>('')
   const [imageUrls, setImageUrls] = useState<string[]>([])
-  const [aspectRatio, setAspectRatio] = useState<AspectRatio>('auto')
-  const [guidanceScale, setGuidanceScale] = useState(3.5)
-  const [numImages, setNumImages] = useState(1)
-  const [outputFormat, setOutputFormat] = useState<OutputFormat>('png')
-  const [safetyTolerance, setSafetyTolerance] = useState<SafetyTolerance>('5')
-  const [model, setModel] = useState<FluxModel>('pro')
+  const [aspectRatio, setAspectRatio] = useState<AspectRatio>(initialSettings.aspectRatio)
+  const [guidanceScale, setGuidanceScale] = useState(initialSettings.guidanceScale)
+  const [numImages, setNumImages] = useState(initialSettings.numImages)
+  const [outputFormat, setOutputFormat] = useState<OutputFormat>(initialSettings.outputFormat)
+  const [safetyTolerance, setSafetyTolerance] = useState<SafetyTolerance>(initialSettings.safetyTolerance)
+  const [model, setModel] = useState<FluxModel>(initialSettings.model)
   const [seed, setSeed] = useState<number | undefined>(undefined)
-  const [showAdvanced, setShowAdvanced] = useState(false)
+  const [showAdvanced, setShowAdvanced] = useState(initialSettings.showAdvanced)
 
   // 预设系统状态
-  const [usePreset, setUsePreset] = useState(false) // 默认使用自定义提示词模式
+  const [usePreset, setUsePreset] = useState(initialSettings.usePreset) // 从本地存储加载
   const [selectedPreset, setSelectedPreset] = useState<string>('')
   const [subject, setSubject] = useState<string>('')
   const [generatingPresetPrompt, setGeneratingPresetPrompt] = useState(false)
 
   // 提示词优化状态
   const [optimizingPrompt, setOptimizingPrompt] = useState(false)
-  const [enableOptimization, setEnableOptimization] = useState(true) // 默认启用优化
+  const [enableOptimization, setEnableOptimization] = useState(initialSettings.enableOptimization) // 从本地存储加载
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [showOptimizationWarning, setShowOptimizationWarning] = useState(false)
 
@@ -76,6 +122,21 @@ export function GenerationForm({ onGenerate, loading = false, defaultPrompt = ''
   const [imageDimensions, setImageDimensions] = useState<{ width: number; height: number } | null>(null)
   const [isDetecting, setIsDetecting] = useState(false)
 
+  // 保存设置到本地存储
+  useEffect(() => {
+    // 只保存用户可配置的设置，不保存图片URL等临时数据
+    saveSettings({
+      aspectRatio,
+      guidanceScale,
+      numImages,
+      outputFormat,
+      safetyTolerance,
+      model,
+      showAdvanced,
+      usePreset,
+      enableOptimization
+    })
+  }, [aspectRatio, guidanceScale, numImages, outputFormat, safetyTolerance, model, showAdvanced, usePreset, enableOptimization])
 
 
   // 根据模型类型动态生成比例选项

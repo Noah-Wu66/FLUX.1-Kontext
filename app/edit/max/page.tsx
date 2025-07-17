@@ -1,10 +1,11 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Image } from 'lucide-react'
 import { GenerationForm } from '@/components/GenerationForm'
 import { ImageGallery } from '@/components/ImageGallery'
 import { useToast } from '@/components/ui/Toast'
+import { scrollToResultOnMobile, loadGenerationResult, saveGenerationResult } from '@/lib/utils'
 import type { GenerationRequest, GeneratedImage } from '@/lib/types'
 
 export default function MaxEditPage() {
@@ -14,6 +15,17 @@ export default function MaxEditPage() {
   const [currentSeed, setCurrentSeed] = useState<number>()
   const [currentModel, setCurrentModel] = useState<string>('max')
   const { addToast, ToastContainer, success, error: showError } = useToast()
+
+  // 页面加载时恢复上次的生成结果
+  useEffect(() => {
+    const savedResult = loadGenerationResult()
+    if (savedResult) {
+      setImages(savedResult.images)
+      setCurrentPrompt(savedResult.prompt)
+      setCurrentSeed(savedResult.seed)
+      setCurrentModel(savedResult.model)
+    }
+  }, [])
 
   const handleGenerate = async (request: GenerationRequest) => {
     setLoading(true)
@@ -39,6 +51,17 @@ export default function MaxEditPage() {
         setImages(result.data.images)
         setCurrentSeed(result.data.seed)
         success('生成成功', `已生成 ${result.data.images.length} 张图片`)
+
+        // 保存生成结果到本地存储
+        saveGenerationResult({
+          images: result.data.images,
+          prompt: request.prompt,
+          seed: result.data.seed,
+          model: 'max' // 强制使用 max 模型
+        })
+
+        // 移动端自动滚动到生成结果
+        scrollToResultOnMobile()
       } else {
         showError('生成失败', result.error || '请重试')
         setImages([])

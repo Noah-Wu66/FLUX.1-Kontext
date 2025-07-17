@@ -160,3 +160,88 @@ export function formatAspectRatioText(width: number, height: number, detectedRat
   const ratioInfo = getAspectRatioInfo(detectedRatio)
   return `${width} × ${height} (${ratioValue}) → ${ratioInfo.label}`
 }
+
+/**
+ * 移动端自动滚动到生成结果
+ */
+export function scrollToResultOnMobile(delay: number = 100): void {
+  if (typeof window !== 'undefined' && window.innerWidth < 768) {
+    setTimeout(() => {
+      const resultElement = document.querySelector('.order-2')
+      if (resultElement) {
+        resultElement.scrollIntoView({
+          behavior: 'smooth',
+          block: 'start'
+        })
+      }
+    }, delay)
+  }
+}
+
+/**
+ * 生成结果本地存储管理
+ */
+const GENERATION_RESULT_KEY = 'flux-kontext-last-result'
+
+export interface SavedGenerationResult {
+  images: import('./types').GeneratedImage[]
+  prompt: string
+  seed?: number
+  model: string
+  timestamp: number
+}
+
+/**
+ * 保存生成结果到本地存储
+ */
+export function saveGenerationResult(result: Omit<SavedGenerationResult, 'timestamp'>): void {
+  if (typeof window === 'undefined') return
+
+  try {
+    const savedResult: SavedGenerationResult = {
+      ...result,
+      timestamp: Date.now()
+    }
+    localStorage.setItem(GENERATION_RESULT_KEY, JSON.stringify(savedResult))
+  } catch (error) {
+    console.error('保存生成结果失败:', error)
+  }
+}
+
+/**
+ * 从本地存储加载生成结果
+ */
+export function loadGenerationResult(): SavedGenerationResult | null {
+  if (typeof window === 'undefined') return null
+
+  try {
+    const saved = localStorage.getItem(GENERATION_RESULT_KEY)
+    if (saved) {
+      const parsed: SavedGenerationResult = JSON.parse(saved)
+      // 检查是否过期（7天）
+      const isExpired = Date.now() - parsed.timestamp > 7 * 24 * 60 * 60 * 1000
+      if (!isExpired) {
+        return parsed
+      } else {
+        // 清除过期数据
+        localStorage.removeItem(GENERATION_RESULT_KEY)
+      }
+    }
+  } catch (error) {
+    console.error('加载生成结果失败:', error)
+  }
+  return null
+}
+
+/**
+ * 清除保存的生成结果
+ */
+export function clearGenerationResult(): void {
+  if (typeof window === 'undefined') return
+
+  try {
+    localStorage.removeItem(GENERATION_RESULT_KEY)
+  } catch (error) {
+    console.error('清除生成结果失败:', error)
+  }
+}
