@@ -198,8 +198,8 @@ export function GenerationForm({ onGenerate, loading = false, defaultPrompt = ''
     setPrompt('') // 清空自定义提示词
   }
 
-  // 优化提示词（支持图片分析）
-  const optimizePrompt = async (promptText?: string, imageUrl?: string) => {
+  // 优化提示词（支持单图和多图分析）
+  const optimizePrompt = async (promptText?: string, imageUrl?: string, imageUrls?: string[]) => {
     const textToOptimize = promptText || prompt.trim()
     if (!textToOptimize) {
       setErrors({ ...errors, prompt: '请先输入提示词' })
@@ -218,6 +218,8 @@ export function GenerationForm({ onGenerate, loading = false, defaultPrompt = ''
       // 如果有图片URL，添加到请求中
       if (imageUrl) {
         requestBody.imageUrl = imageUrl
+      } else if (imageUrls && imageUrls.length > 0) {
+        requestBody.imageUrls = imageUrls
       }
 
       const response = await fetch('/api/optimize-prompt', {
@@ -366,12 +368,11 @@ export function GenerationForm({ onGenerate, loading = false, defaultPrompt = ''
     // 如果启用了提示词优化，先优化提示词
     if (enableOptimization && finalPrompt) {
       try {
-        // 获取图片URL（优先使用单图，如果是多图模式则使用第一张）
-        const currentImageUrl = model === 'max-multi' && imageUrls.length > 0
-          ? imageUrls[0]
-          : imageUrl
+        // 获取图片URL（单图或多图）
+        const currentImageUrl = model !== 'max-multi' ? imageUrl : undefined
+        const currentImageUrls = model === 'max-multi' && imageUrls.length > 0 ? imageUrls : undefined
 
-        const optimizedPrompt = await optimizePrompt(finalPrompt, currentImageUrl)
+        const optimizedPrompt = await optimizePrompt(finalPrompt, currentImageUrl, currentImageUrls)
         if (optimizedPrompt) {
           finalPrompt = optimizedPrompt
           console.log('使用优化后的提示词:', finalPrompt)
@@ -480,7 +481,7 @@ export function GenerationForm({ onGenerate, loading = false, defaultPrompt = ''
             />
 
             {/* 提示词优化选项 */}
-            <div className="mt-3 space-y-2">
+            <div className="mt-3">
               <div className="flex items-center space-x-2">
                 <input
                   type="checkbox"
@@ -494,32 +495,24 @@ export function GenerationForm({ onGenerate, loading = false, defaultPrompt = ''
                   生成时自动优化提示词
                 </label>
               </div>
-              <p className="text-xs text-gray-500 ml-6">
-                AI 将分析图片内容并优化您的提示词为完整的英文描述
+              <p className="text-xs text-gray-500 ml-6 mt-1">
+                {model.includes('text-to-image')
+                  ? 'AI 将按照 Kontext 最佳实践优化您的描述，生成详细的场景、风格和构图指令'
+                  : model === 'max-multi'
+                    ? 'AI 将分析所有图片内容，按照 Kontext 多图互动编辑最佳实践，生成图片间元素融合的精确指令'
+                    : 'AI 将分析图片内容，按照 Kontext 最佳实践优化您的提示词，确保精确控制和元素保持'
+                }
               </p>
-
-              {/* 手动优化按钮 */}
-              <div className="flex justify-center">
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => optimizePrompt()}
-                  disabled={loading || optimizingPrompt || !prompt.trim()}
-                  loading={optimizingPrompt}
-                  className="text-sm"
-                >
-                  <Sparkles className="w-4 h-4 mr-2" />
-                  {optimizingPrompt ? 'AI 优化中...' : '立即优化提示词'}
-                </Button>
-              </div>
             </div>
 
             {errors.prompt && (
               <p className="mt-1 text-sm text-red-600">{errors.prompt}</p>
             )}
             <p className="mt-1 text-sm text-gray-500">
-              详细描述你想要的图片内容、风格、颜色等，或点击优化按钮让 AI 帮你完善提示词（优化结果为英文）
+              {model.includes('text-to-image')
+                ? '描述您想要生成的图片（可以很简单）。启用自动优化后，AI 将按照 Kontext 专业标准生成详细的场景、风格和构图描述。'
+                : '详细描述你想要的图片内容、风格、颜色等。启用自动优化后，AI 将按照 Kontext 专业标准完善您的提示词。'
+              }
             </p>
           </div>
         ) : usePreset ? (
@@ -588,7 +581,7 @@ export function GenerationForm({ onGenerate, loading = false, defaultPrompt = ''
             </div>
 
             {/* 提示词优化选项 */}
-            <div className="mt-3 space-y-2">
+            <div className="mt-3">
               <div className="flex items-center space-x-2">
                 <input
                   type="checkbox"
@@ -602,32 +595,21 @@ export function GenerationForm({ onGenerate, loading = false, defaultPrompt = ''
                   生成时自动优化提示词
                 </label>
               </div>
-              <p className="text-xs text-gray-500 ml-6">
-                AI 将分析图片内容并优化您的提示词为完整的英文描述
+              <p className="text-xs text-gray-500 ml-6 mt-1">
+                {model.includes('text-to-image')
+                  ? 'AI 将按照 Kontext 最佳实践优化您的描述，生成详细的场景、风格和构图指令'
+                  : model === 'max-multi'
+                    ? 'AI 将分析所有图片内容，按照 Kontext 多图互动编辑最佳实践，生成图片间元素融合的精确指令'
+                    : 'AI 将分析图片内容，按照 Kontext 最佳实践优化您的提示词，确保精确控制和元素保持'
+                }
               </p>
-
-              {/* 手动优化按钮 */}
-              <div className="flex justify-center">
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => optimizePrompt()}
-                  disabled={loading || optimizingPrompt || !prompt.trim()}
-                  loading={optimizingPrompt}
-                  className="text-sm"
-                >
-                  <Sparkles className="w-4 h-4 mr-2" />
-                  {optimizingPrompt ? 'AI 优化中...' : '立即优化提示词'}
-                </Button>
-              </div>
             </div>
 
             {errors.prompt && (
               <p className="mt-1 text-sm text-red-600">{errors.prompt}</p>
             )}
             <p className="mt-1 text-sm text-gray-500">
-              详细描述你想要的图片编辑效果。启用自动优化后，AI 将分析图片内容并完善您的提示词。也可以点击右上角的预设模式按钮使用 AI 预设。
+              描述您想要的编辑效果（可以很简单）。启用自动优化后，AI 将按照 Kontext 专业标准分析图片并生成精确的编辑指令。也可以点击右上角的预设模式按钮使用 AI 预设。
             </p>
           </div>
         )}

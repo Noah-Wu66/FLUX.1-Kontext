@@ -199,6 +199,102 @@ export class GeminiUtils {
 
 
   /**
+   * 多图像理解对话 - 用于多图编辑提示词生成
+   */
+  static async multiImageChat(
+    prompt: string,
+    imageBase64Array: string[],
+    imageFormat: string = 'jpeg',
+    options?: {
+      temperature?: number
+      max_tokens?: number
+    }
+  ): Promise<GeminiApiResult<string>> {
+    try {
+      // 构建包含多张图片的消息内容
+      const content: any[] = [
+        {
+          type: 'text',
+          text: prompt
+        }
+      ]
+
+      // 添加所有图片
+      imageBase64Array.forEach((imageBase64, index) => {
+        content.push({
+          type: 'image_url',
+          image_url: {
+            url: `data:image/${imageFormat};base64,${imageBase64}`
+          }
+        })
+      })
+
+      const messages: OpenAI.Chat.Completions.ChatCompletionMessageParam[] = [
+        {
+          role: 'user',
+          content
+        }
+      ]
+
+      console.log('GeminiUtils.multiImageChat 开始调用:', {
+        promptLength: prompt.length,
+        imageCount: imageBase64Array.length,
+        imageFormat,
+        options
+      })
+
+      const result = await geminiAPI.chat(
+        'gemini-2.5-flash',
+        messages,
+        options
+      )
+
+      console.log('GeminiUtils.multiImageChat API 调用结果:', {
+        success: result.success,
+        hasData: !!result.data,
+        error: result.error,
+        choicesLength: result.data?.choices?.length,
+        firstChoiceContent: result.data?.choices?.[0]?.message?.content?.substring(0, 100)
+      })
+
+      if (result.success && result.data) {
+        const content = result.data.choices?.[0]?.message?.content
+        if (content && content.trim()) {
+          console.log('GeminiUtils.multiImageChat 成功返回内容:', content.substring(0, 100) + '...')
+          return {
+            success: true,
+            data: content.trim()
+          }
+        } else {
+          console.error('GeminiUtils.multiImageChat 响应内容为空:', {
+            choices: result.data.choices,
+            firstChoice: result.data.choices?.[0]
+          })
+          return {
+            success: false,
+            error: 'AI 返回的内容为空'
+          }
+        }
+      }
+
+      console.error('GeminiUtils.multiImageChat 调用失败:', result.error)
+      return {
+        success: false,
+        error: result.error || 'AI 调用失败'
+      }
+    } catch (error) {
+      console.error('GeminiUtils.multiImageChat 异常:', {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined
+      })
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'AI 调用异常'
+      }
+    }
+  }
+
+  /**
    * 将文件转换为 Base64
    */
   static async fileToBase64(file: File): Promise<string> {

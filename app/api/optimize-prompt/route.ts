@@ -4,7 +4,8 @@ import GeminiUtils from '@/lib/gemini-utils'
 interface OptimizePromptRequest {
   prompt: string
   model: string // FLUX 模型类型，用于针对性优化
-  imageUrl?: string // 图片URL，用于图像理解
+  imageUrl?: string // 单图片URL，用于图像理解
+  imageUrls?: string[] // 多图片URLs，用于多图编辑
 }
 
 export async function POST(request: NextRequest) {
@@ -46,23 +47,33 @@ export async function POST(request: NextRequest) {
     }
 
     // 检查是否有图片需要分析
-    if (body.imageUrl) {
-      // 有图片的情况：使用图像理解功能
+    const hasImages = body.imageUrl || (body.imageUrls && body.imageUrls.length > 0)
+
+    if (hasImages) {
+      // 确定要处理的图片URLs
+      const imageUrlsToProcess = body.imageUrls && body.imageUrls.length > 0
+        ? body.imageUrls
+        : body.imageUrl ? [body.imageUrl] : []
+
       console.log('检测到图片，使用图像理解优化提示词:', {
-        imageUrl: body.imageUrl.substring(0, 100) + '...',
+        imageCount: imageUrlsToProcess.length,
+        isMultiImage: imageUrlsToProcess.length > 1,
         prompt: body.prompt
       })
 
-      // 下载图片并转换为 base64
-      let imageBase64: string
+      // 下载所有图片并转换为 base64
+      const imageBase64Array: string[] = []
       try {
-        const imageResponse = await fetch(body.imageUrl)
-        if (!imageResponse.ok) {
-          throw new Error('无法下载图片')
-        }
+        for (const imageUrl of imageUrlsToProcess) {
+          const imageResponse = await fetch(imageUrl)
+          if (!imageResponse.ok) {
+            throw new Error(`无法下载图片: ${imageUrl}`)
+          }
 
-        const imageBuffer = await imageResponse.arrayBuffer()
-        imageBase64 = Buffer.from(imageBuffer).toString('base64')
+          const imageBuffer = await imageResponse.arrayBuffer()
+          const imageBase64 = Buffer.from(imageBuffer).toString('base64')
+          imageBase64Array.push(imageBase64)
+        }
       } catch (error) {
         console.error('图片下载失败:', error)
         return NextResponse.json(
@@ -71,31 +82,102 @@ export async function POST(request: NextRequest) {
         )
       }
 
-      // 构建图像理解的提示词
-      const imageAnalysisPrompt = `You are an expert at analyzing images and optimizing prompts for FLUX.1 Kontext image editing models.
+      // 构建图像理解的提示词（基于 Kontext 最佳实践）
+      const isMultiImage = imageBase64Array.length > 1
 
-Task: Analyze the uploaded image and optimize the user's editing instruction.
+      const imageAnalysisPrompt = isMultiImage
+        ? `You are an expert at analyzing multiple images and optimizing prompts for FLUX.1 Kontext max-multi interactive image editing models.
+
+KONTEXT MULTI-IMAGE INTERACTIVE EDITING PRINCIPLES:
+- Analyze ALL images to understand individual elements that can be combined or interact
+- Multi-image editing involves taking elements from one image and integrating them into another image
+- Use specific, precise language with exact color names and clear verbs
+- Identify transferable elements (objects, patterns, textures, people) from source images
+- Specify precise integration instructions for combining elements across images
+- Use natural element descriptions (e.g., "the red apple", "the woman's blue dress", "the wooden texture")
+- Preserve the target image's composition while seamlessly integrating new elements
+- Consider lighting, scale, perspective, and style matching for realistic integration
+- Keep prompts under 512 tokens
+
+User's instruction: "${body.prompt.trim()}"
+Number of images: ${imageBase64Array.length}
+
+TASK: Analyze all uploaded images and create an optimized Kontext multi-image interactive editing prompt.
+
+MULTI-IMAGE INTERACTIVE ANALYSIS STEPS:
+1. Analyze each image individually: identify key objects, people, patterns, textures, backgrounds
+2. Understand which elements from which images should be transferred or combined
+3. Identify the target image(s) where elements will be integrated
+4. Determine integration method: overlay, pattern, replacement, fusion, etc.
+5. Consider scale, lighting, perspective adjustments needed for seamless integration
+6. Apply Kontext best practices for precision and control
+
+OPTIMIZATION RULES FOR INTERACTIVE MULTI-IMAGE EDITING:
+- Clearly identify source elements: "the red apple", "the floral pattern", "the wooden texture"
+- Specify target location: "on the woman's dress", "as the background", "on the table surface"
+- Define integration method: "as a repeating pattern", "overlaid on", "replacing the existing", "blended into"
+- Preserve target image integrity: "while maintaining the original dress shape and fit"
+- Match visual properties: "adjust the apple's lighting to match the dress fabric", "scale appropriately"
+- Specify seamless integration: "blend naturally with the existing texture", "maintain realistic shadows"
+- Use precise positioning: "centered on the chest area", "scattered across the fabric", "as a border design"
+
+EXAMPLE STRUCTURES:
+- "Take the [element description] and place it [location] while [preservation clause]"
+- "Use the [pattern/texture description] as [application method] on the [target description]"
+- "Integrate the [object description] into the [scene description] with [matching requirements]"
+
+OUTPUT: Optimized English prompt only (under 512 tokens), following Kontext interactive multi-image best practices.`
+
+        : `You are an expert at analyzing images and optimizing prompts for FLUX.1 Kontext image editing models.
+
+KONTEXT EDITING PRINCIPLES:
+- Use specific, precise language with exact color names and clear verbs
+- Preserve important elements by explicitly stating what should remain unchanged
+- Use direct subject naming instead of pronouns (e.g., "the woman with black hair" not "she")
+- For character consistency, specify "while maintaining the same facial features, eye color, and facial expression"
+- For composition control, specify "keeping the exact same position, scale, pose, camera angle, and framing"
+- Choose verbs carefully: "change the clothes" vs "transform" (which implies complete change)
+- Keep prompts under 512 tokens
 
 User's instruction: "${body.prompt.trim()}"
 
-Please:
-1. Analyze the image content (people, objects, background, style, lighting, etc.)
-2. Understand the user's editing intention
-3. Create a complete, detailed English prompt that combines image analysis with user instruction
-4. If the instruction involves people or main subjects, add "Maintain the consistency between the characters and the background."
-5. Make the prompt specific and actionable for image editing
+TASK: Analyze the uploaded image and create an optimized Kontext editing prompt.
 
-Output format: Optimized English prompt only, no explanations or analysis text.`
+ANALYSIS STEPS:
+1. Identify key subjects (people, objects, main elements) with specific descriptors
+2. Understand the user's editing intention
+3. Determine what should be preserved vs. changed
+4. Apply Kontext best practices for precision and control
+
+OPTIMIZATION RULES:
+- Use specific language: exact colors, detailed descriptions, clear action verbs
+- Explicitly preserve important elements: "while maintaining the same [facial features/composition/lighting/style]"
+- For people: preserve identity with "keeping the exact facial features, eye color, and facial expression"
+- For backgrounds: "change the background to [X] while keeping the person in the exact same position, scale, and pose"
+- For style changes: specify the exact style and what to preserve
+- For text editing: use format "Replace '[original text]' with '[new text]'"
+- For object modifications: be specific about what changes and what stays the same
+
+OUTPUT: Optimized English prompt only (under 512 tokens), following Kontext best practices.`
 
       // 使用 Gemini 进行图像理解和提示词优化
-      const result = await GeminiUtils.imageChat(
-        imageAnalysisPrompt,
-        imageBase64,
-        'jpeg',
-        {
-          temperature: 0.7
-        }
-      )
+      const result = isMultiImage
+        ? await GeminiUtils.multiImageChat(
+            imageAnalysisPrompt,
+            imageBase64Array,
+            'jpeg',
+            {
+              temperature: 0.7
+            }
+          )
+        : await GeminiUtils.imageChat(
+            imageAnalysisPrompt,
+            imageBase64Array[0],
+            'jpeg',
+            {
+              temperature: 0.7
+            }
+          )
 
       if (result.success && result.data) {
         const optimizedPrompt = result.data.trim()
@@ -119,23 +201,67 @@ Output format: Optimized English prompt only, no explanations or analysis text.`
     }
 
     // 纯文本优化（无图片或图像理解失败时）
-    const systemPrompt = `You are an AI prompt optimizer for FLUX.1 Kontext models.
+    let systemPrompt: string
+    let userPrompt: string
 
-Task: Optimize the user's prompt for image generation/editing.
+    if (body.model.includes('text-to-image')) {
+      // 文生图优化 - 专注于场景描述、风格、构图
+      systemPrompt = `You are an AI prompt optimizer for FLUX.1 Kontext text-to-image models.
 
-Rules:
+KONTEXT TEXT-TO-IMAGE PRINCIPLES:
+- Use specific, precise language with exact color names and detailed descriptions
+- Create vivid, detailed scene descriptions with specific visual elements
+- Include lighting, atmosphere, and mood descriptions
+- Specify camera angles, composition, and framing
+- Use professional photography/art terminology
+- Include style references (art movements, photography styles, etc.)
+- Add technical details (camera settings, lens types, etc.) when appropriate
+- Keep prompts under 512 tokens
+
+OPTIMIZATION RULES FOR TEXT-TO-IMAGE:
 1. Translate to English if needed
-2. Make the prompt complete and specific
-3. Add visual details and style descriptions
-4. Use FLUX-compatible terminology
-5. If the prompt involves people or main subjects, add "Maintain the consistency between the characters and the background."
+2. Expand basic descriptions into rich, detailed scenes
+3. Add specific visual elements: lighting (golden hour, soft lighting, dramatic shadows)
+4. Include composition details: close-up, wide shot, rule of thirds, symmetrical
+5. Specify style: photorealistic, oil painting, watercolor, digital art, etc.
+6. Add atmosphere: mood, weather, time of day, season
+7. Include technical details: shallow depth of field, bokeh, high resolution, sharp focus
+8. Use professional terminology: portrait, landscape, macro, architectural
+9. Add color palette descriptions: warm tones, cool colors, monochromatic, vibrant
+10. Specify quality markers: highly detailed, professional photography, award-winning
 
-Model: ${body.model}
-${body.model.includes('text-to-image') ? 'Focus: scene description, style, composition' : 'Focus: clear editing instructions'}
+STRUCTURE: [Subject] + [Action/Pose] + [Setting/Background] + [Lighting] + [Style] + [Technical details] + [Mood/Atmosphere]
 
-Output: Optimized English prompt only, no explanations.`
+Output: Optimized English prompt only (under 512 tokens), following Kontext text-to-image best practices.`
 
-    const userPrompt = `Optimize this prompt: ${body.prompt.trim()}`
+      userPrompt = `Create a detailed text-to-image prompt from this description: ${body.prompt.trim()}`
+    } else {
+      // 图片编辑优化 - 专注于精确编辑指令
+      systemPrompt = `You are an AI prompt optimizer for FLUX.1 Kontext image editing models.
+
+KONTEXT EDITING PRINCIPLES:
+- Use specific, precise language with exact color names and clear verbs
+- Preserve important elements by explicitly stating what should remain unchanged
+- Use direct subject naming instead of pronouns
+- For character edits: specify "while maintaining the same facial features, eye color, and facial expression"
+- For composition control: specify "keeping the exact same position, scale, pose, camera angle, and framing"
+- Choose verbs carefully: "change the clothes" vs "transform" (complete change)
+- Keep prompts under 512 tokens
+
+OPTIMIZATION RULES FOR IMAGE EDITING:
+1. Translate to English if needed
+2. Make the prompt complete and specific with exact details
+3. Use precise language: specific colors, detailed descriptions, clear action verbs
+4. For people: preserve identity with specific descriptors
+5. For backgrounds: specify preservation of subject positioning
+6. For style changes: name exact style and what to preserve
+7. For text editing: use "Replace '[original]' with '[new]'" format
+8. Add appropriate preservation clauses
+
+Output: Optimized English prompt only (under 512 tokens), following Kontext editing best practices.`
+
+      userPrompt = `Optimize this editing instruction following Kontext best practices: ${body.prompt.trim()}`
+    }
 
     console.log('开始优化提示词:', {
       originalPrompt: body.prompt.substring(0, 100) + '...',
