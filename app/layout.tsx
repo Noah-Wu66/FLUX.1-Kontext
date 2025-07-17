@@ -43,9 +43,9 @@ export default function RootLayout({
               <div className="text-center">
                 <p className="text-sm pc:text-base text-gray-600">
                   基于 FLUX.1 Kontext API 构建 |
-                  <a href="https://fal.ai" target="_blank" rel="noopener noreferrer" className="text-primary-600 hover:text-primary-700 ml-1">
-                    Powered by FAL.ai
-                  </a>
+                  <span className="text-primary-600 ml-1">
+                    Powered by Noah Wu
+                  </span>
                 </p>
               </div>
             </div>
