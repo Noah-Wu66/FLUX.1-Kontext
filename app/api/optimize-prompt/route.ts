@@ -7,8 +7,10 @@ interface OptimizePromptRequest {
 }
 
 export async function POST(request: NextRequest) {
+  let body: OptimizePromptRequest | null = null
+
   try {
-    const body: OptimizePromptRequest = await request.json()
+    body = await request.json()
 
     // 验证必需字段
     if (!body.prompt || !body.prompt.trim()) {
@@ -121,8 +123,8 @@ ${body.prompt.trim()}`
     console.error('优化提示词错误:', {
       error: error instanceof Error ? error.message : String(error),
       stack: error instanceof Error ? error.stack : undefined,
-      prompt: body?.prompt?.substring(0, 100) + '...',
-      model: body?.model
+      prompt: body?.prompt ? body.prompt.substring(0, 100) + '...' : '未知',
+      model: body?.model || '未知'
     })
 
     let errorMessage = '服务器内部错误'
