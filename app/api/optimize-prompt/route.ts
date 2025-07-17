@@ -12,6 +12,14 @@ export async function POST(request: NextRequest) {
   try {
     body = await request.json()
 
+    // 验证 body 不为空
+    if (!body) {
+      return NextResponse.json(
+        { success: false, error: '请求数据不能为空' },
+        { status: 400 }
+      )
+    }
+
     // 验证必需字段
     if (!body.prompt || !body.prompt.trim()) {
       return NextResponse.json(
