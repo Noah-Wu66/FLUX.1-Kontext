@@ -496,12 +496,7 @@ export function GenerationForm({ onGenerate, loading = false, defaultPrompt = ''
                 </label>
               </div>
               <p className="text-xs text-gray-500 ml-6 mt-1">
-                {model === 'max-multi'
-                  ? 'AI 将分析所有图片内容，按照 Kontext 多图互动编辑最佳实践，生成图片间元素融合的精确指令'
-                  : model.includes('text-to-image')
-                    ? 'AI 将按照 Kontext 最佳实践优化您的描述，生成详细的场景、风格和构图指令'
-                    : 'AI 将分析图片内容，按照 Kontext 最佳实践优化您的提示词，确保精确控制和元素保持'
-                }
+                AI 将按照 Kontext 最佳实践优化您的描述，生成详细的场景、风格和构图指令
               </p>
             </div>
 
@@ -598,9 +593,7 @@ export function GenerationForm({ onGenerate, loading = false, defaultPrompt = ''
               <p className="text-xs text-gray-500 ml-6 mt-1">
                 {model === 'max-multi'
                   ? 'AI 将分析所有图片内容，按照 Kontext 多图互动编辑最佳实践，生成图片间元素融合的精确指令'
-                  : model.includes('text-to-image')
-                    ? 'AI 将按照 Kontext 最佳实践优化您的描述，生成详细的场景、风格和构图指令'
-                    : 'AI 将分析图片内容，按照 Kontext 最佳实践优化您的提示词，确保精确控制和元素保持'
+                  : 'AI 将分析图片内容，按照 Kontext 最佳实践优化您的提示词，确保精确控制和元素保持'
                 }
               </p>
             </div>
