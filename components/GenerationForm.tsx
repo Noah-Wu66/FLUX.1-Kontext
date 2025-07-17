@@ -67,6 +67,7 @@ export function GenerationForm({ onGenerate, loading = false, defaultPrompt = ''
 
   // 提示词优化状态
   const [optimizingPrompt, setOptimizingPrompt] = useState(false)
+  const [enableOptimization, setEnableOptimization] = useState(true) // 默认启用优化
   const [errors, setErrors] = useState<Record<string, string>>({})
 
   // 自动检测相关状态
@@ -197,26 +198,34 @@ export function GenerationForm({ onGenerate, loading = false, defaultPrompt = ''
     setPrompt('') // 清空自定义提示词
   }
 
-  // 优化提示词
-  const optimizePrompt = async () => {
-    if (!prompt.trim()) {
+  // 优化提示词（支持图片分析）
+  const optimizePrompt = async (promptText?: string, imageUrl?: string) => {
+    const textToOptimize = promptText || prompt.trim()
+    if (!textToOptimize) {
       setErrors({ ...errors, prompt: '请先输入提示词' })
-      return
+      return null
     }
 
     setOptimizingPrompt(true)
     setErrors({ ...errors, prompt: '' })
 
     try {
+      const requestBody: any = {
+        prompt: textToOptimize,
+        model: model
+      }
+
+      // 如果有图片URL，添加到请求中
+      if (imageUrl) {
+        requestBody.imageUrl = imageUrl
+      }
+
       const response = await fetch('/api/optimize-prompt', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          prompt: prompt.trim(),
-          model: model
-        }),
+        body: JSON.stringify(requestBody),
       })
 
       if (!response.ok) {
@@ -226,11 +235,20 @@ export function GenerationForm({ onGenerate, loading = false, defaultPrompt = ''
       const result = await response.json()
 
       if (result.success) {
-        setPrompt(result.optimizedPrompt)
+        if (promptText) {
+          // 如果是外部调用（生成时优化），返回优化后的提示词
+          return result.optimizedPrompt
+        } else {
+          // 如果是手动优化，更新当前提示词
+          setPrompt(result.optimizedPrompt)
+        }
       } else {
         const errorMessage = result.error || '优化提示词失败'
         console.error('API 返回错误:', errorMessage)
-        setErrors({ ...errors, prompt: errorMessage })
+        if (!promptText) {
+          setErrors({ ...errors, prompt: errorMessage })
+        }
+        return null
       }
     } catch (error) {
       console.error('优化提示词错误:', error)
@@ -242,7 +260,10 @@ export function GenerationForm({ onGenerate, loading = false, defaultPrompt = ''
           errorMessage = 'AI 服务配置错误，请联系管理员'
         }
       }
-      setErrors({ ...errors, prompt: errorMessage })
+      if (!promptText) {
+        setErrors({ ...errors, prompt: errorMessage })
+      }
+      return null
     } finally {
       setOptimizingPrompt(false)
     }
@@ -339,8 +360,32 @@ export function GenerationForm({ onGenerate, loading = false, defaultPrompt = ''
       finalAspectRatio = aspectRatio
     }
 
+    // 确定最终使用的提示词
+    let finalPrompt = prompt.trim()
+
+    // 如果启用了提示词优化，先优化提示词
+    if (enableOptimization && finalPrompt) {
+      try {
+        // 获取图片URL（优先使用单图，如果是多图模式则使用第一张）
+        const currentImageUrl = model === 'max-multi' && imageUrls.length > 0
+          ? imageUrls[0]
+          : imageUrl
+
+        const optimizedPrompt = await optimizePrompt(finalPrompt, currentImageUrl)
+        if (optimizedPrompt) {
+          finalPrompt = optimizedPrompt
+          console.log('使用优化后的提示词:', finalPrompt)
+        } else {
+          console.warn('提示词优化失败，使用原始提示词')
+        }
+      } catch (error) {
+        console.error('提示词优化过程中出错:', error)
+        // 优化失败时继续使用原始提示词
+      }
+    }
+
     const request: GenerationRequest = {
-      prompt: prompt.trim(),
+      prompt: finalPrompt,
       aspectRatio: finalAspectRatio,
       guidanceScale,
       numImages,
@@ -434,20 +479,40 @@ export function GenerationForm({ onGenerate, loading = false, defaultPrompt = ''
               rows={3}
             />
 
-            {/* 优化提示词按钮 */}
-            <div className="mt-2 flex justify-center">
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={optimizePrompt}
-                disabled={loading || optimizingPrompt || !prompt.trim()}
-                loading={optimizingPrompt}
-                className="text-sm"
-              >
-                <Sparkles className="w-4 h-4 mr-2" />
-                {optimizingPrompt ? 'AI 优化中...' : '优化为英文提示词'}
-              </Button>
+            {/* 提示词优化选项 */}
+            <div className="mt-3 space-y-2">
+              <div className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  id="enableOptimization"
+                  checked={enableOptimization}
+                  onChange={(e) => setEnableOptimization(e.target.checked)}
+                  className="w-4 h-4 text-primary-600 bg-gray-100 border-gray-300 rounded focus:ring-primary-500 focus:ring-2"
+                />
+                <label htmlFor="enableOptimization" className="text-sm font-medium text-gray-700">
+                  <Sparkles className="w-4 h-4 inline mr-1" />
+                  生成时自动优化提示词
+                </label>
+              </div>
+              <p className="text-xs text-gray-500 ml-6">
+                AI 将分析图片内容并优化您的提示词为完整的英文描述
+              </p>
+
+              {/* 手动优化按钮 */}
+              <div className="flex justify-center">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => optimizePrompt()}
+                  disabled={loading || optimizingPrompt || !prompt.trim()}
+                  loading={optimizingPrompt}
+                  className="text-sm"
+                >
+                  <Sparkles className="w-4 h-4 mr-2" />
+                  {optimizingPrompt ? 'AI 优化中...' : '立即优化提示词'}
+                </Button>
+              </div>
             </div>
 
             {errors.prompt && (
@@ -522,27 +587,47 @@ export function GenerationForm({ onGenerate, loading = false, defaultPrompt = ''
               </div>
             </div>
 
-            {/* 优化提示词按钮 */}
-            <div className="mt-2 flex justify-center">
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={optimizePrompt}
-                disabled={loading || optimizingPrompt || !prompt.trim()}
-                loading={optimizingPrompt}
-                className="text-sm"
-              >
-                <Sparkles className="w-4 h-4 mr-2" />
-                {optimizingPrompt ? 'AI 优化中...' : '优化为英文提示词'}
-              </Button>
+            {/* 提示词优化选项 */}
+            <div className="mt-3 space-y-2">
+              <div className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  id="enableOptimization2"
+                  checked={enableOptimization}
+                  onChange={(e) => setEnableOptimization(e.target.checked)}
+                  className="w-4 h-4 text-primary-600 bg-gray-100 border-gray-300 rounded focus:ring-primary-500 focus:ring-2"
+                />
+                <label htmlFor="enableOptimization2" className="text-sm font-medium text-gray-700">
+                  <Sparkles className="w-4 h-4 inline mr-1" />
+                  生成时自动优化提示词
+                </label>
+              </div>
+              <p className="text-xs text-gray-500 ml-6">
+                AI 将分析图片内容并优化您的提示词为完整的英文描述
+              </p>
+
+              {/* 手动优化按钮 */}
+              <div className="flex justify-center">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => optimizePrompt()}
+                  disabled={loading || optimizingPrompt || !prompt.trim()}
+                  loading={optimizingPrompt}
+                  className="text-sm"
+                >
+                  <Sparkles className="w-4 h-4 mr-2" />
+                  {optimizingPrompt ? 'AI 优化中...' : '立即优化提示词'}
+                </Button>
+              </div>
             </div>
 
             {errors.prompt && (
               <p className="mt-1 text-sm text-red-600">{errors.prompt}</p>
             )}
             <p className="mt-1 text-sm text-gray-500">
-              详细描述你想要的图片编辑效果，或点击优化按钮让 AI 帮你完善提示词（优化结果为英文）。也可以点击右上角的预设模式按钮使用 AI 预设。
+              详细描述你想要的图片编辑效果。启用自动优化后，AI 将分析图片内容并完善您的提示词。也可以点击右上角的预设模式按钮使用 AI 预设。
             </p>
           </div>
         )}

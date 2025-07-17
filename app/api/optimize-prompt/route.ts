@@ -4,6 +4,7 @@ import GeminiUtils from '@/lib/gemini-utils'
 interface OptimizePromptRequest {
   prompt: string
   model: string // FLUX 模型类型，用于针对性优化
+  imageUrl?: string // 图片URL，用于图像理解
 }
 
 export async function POST(request: NextRequest) {
@@ -44,26 +45,97 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // 构建优化提示词的系统提示（简化版本以减少 token 使用）
-    const systemPrompt = `You are an AI image prompt optimizer for FLUX.1 Kontext models.
+    // 检查是否有图片需要分析
+    if (body.imageUrl) {
+      // 有图片的情况：使用图像理解功能
+      console.log('检测到图片，使用图像理解优化提示词:', {
+        imageUrl: body.imageUrl.substring(0, 100) + '...',
+        prompt: body.prompt
+      })
 
-Task: Optimize the user's prompt for high-quality image generation.
+      // 下载图片并转换为 base64
+      let imageBase64: string
+      try {
+        const imageResponse = await fetch(body.imageUrl)
+        if (!imageResponse.ok) {
+          throw new Error('无法下载图片')
+        }
+
+        const imageBuffer = await imageResponse.arrayBuffer()
+        imageBase64 = Buffer.from(imageBuffer).toString('base64')
+      } catch (error) {
+        console.error('图片下载失败:', error)
+        return NextResponse.json(
+          { success: false, error: '无法下载图片，请重试' },
+          { status: 400 }
+        )
+      }
+
+      // 构建图像理解的提示词
+      const imageAnalysisPrompt = `You are an expert at analyzing images and optimizing prompts for FLUX.1 Kontext image editing models.
+
+Task: Analyze the uploaded image and optimize the user's editing instruction.
+
+User's instruction: "${body.prompt.trim()}"
+
+Please:
+1. Analyze the image content (people, objects, background, style, lighting, etc.)
+2. Understand the user's editing intention
+3. Create a complete, detailed English prompt that combines image analysis with user instruction
+4. If the instruction involves people or main subjects, add "Maintain the consistency between the characters and the background."
+5. Make the prompt specific and actionable for image editing
+
+Output format: Optimized English prompt only, no explanations or analysis text.`
+
+      // 使用 Gemini 进行图像理解和提示词优化
+      const result = await GeminiUtils.imageChat(
+        imageAnalysisPrompt,
+        imageBase64,
+        'jpeg',
+        {
+          temperature: 0.7
+        }
+      )
+
+      if (result.success && result.data) {
+        const optimizedPrompt = result.data.trim()
+        if (optimizedPrompt) {
+          console.log('图像理解提示词优化成功:', {
+            originalLength: body.prompt.length,
+            optimizedLength: optimizedPrompt.length,
+            optimizedPreview: optimizedPrompt.substring(0, 100) + '...'
+          })
+          return NextResponse.json({
+            success: true,
+            optimizedPrompt,
+            originalPrompt: body.prompt.trim(),
+            usedImageAnalysis: true
+          })
+        }
+      }
+
+      // 如果图像理解失败，回退到纯文本优化
+      console.warn('图像理解失败，回退到纯文本优化:', result.error)
+    }
+
+    // 纯文本优化（无图片或图像理解失败时）
+    const systemPrompt = `You are an AI prompt optimizer for FLUX.1 Kontext models.
+
+Task: Optimize the user's prompt for image generation/editing.
 
 Rules:
-1. Keep original intent
-2. Add visual details
-3. Use FLUX-compatible terms
-4. Improve structure
-5. Add style/lighting descriptions
+1. Translate to English if needed
+2. Make the prompt complete and specific
+3. Add visual details and style descriptions
+4. Use FLUX-compatible terminology
+5. If the prompt involves people or main subjects, add "Maintain the consistency between the characters and the background."
 
 Model: ${body.model}
-${body.model.includes('text-to-image') ? 'Focus: scene, style, composition' : 'Focus: clear editing instructions'}
+${body.model.includes('text-to-image') ? 'Focus: scene description, style, composition' : 'Focus: clear editing instructions'}
 
 Output: Optimized English prompt only, no explanations.`
 
-    const userPrompt = `Please optimize the following prompt (translate to English if needed and optimize):
-
-${body.prompt.trim()}`
+    const userPrompt = `Optimize this prompt: ${body.prompt.trim()}`
 
     console.log('开始优化提示词:', {
       originalPrompt: body.prompt.substring(0, 100) + '...',
