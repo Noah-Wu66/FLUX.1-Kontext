@@ -139,6 +139,26 @@ KONTEXT EDITING PRINCIPLES:
 - Choose verbs carefully: "change the clothes" vs "transform" (which implies complete change)
 - Keep prompts under 512 tokens
 
+STYLE TRANSFER BEST PRACTICES:
+- Specify exact style names: "Transform to Bauhaus art style" not "make it more artistic"
+- Reference known artists/movements: "Renaissance painting style", "watercolor painting"
+- Describe visual characteristics: "oil painting with visible brushstrokes, thick paint texture, and rich color depth"
+- Always preserve important elements: "while maintaining the original composition and object placement"
+
+VISUAL CUES SUPPORT:
+- If boxes or markings are visible in the image, reference them: "Add hats in the boxes"
+- Use visual markers to guide specific area edits
+
+ITERATIVE EDITING GUIDELINES:
+- Maintain character consistency across multiple edits
+- Use specific descriptors: "the woman with short black hair" not "she"
+- For complex transformations, suggest step-by-step approach
+
+TROUBLESHOOTING GUIDELINES:
+- For identity preservation: Use "Change the clothes to [X]" instead of "Transform the person into [X]"
+- For composition control: "Change the background to [X] while keeping the person in the exact same position, scale, and pose. Maintain identical subject placement, camera angle, framing, and perspective. Only replace the environment around them"
+- For style application: "Convert to [style] with [specific characteristics] while preserving [important elements]"
+
 User's instruction: "${body.prompt.trim()}"
 
 TASK: Analyze the uploaded image and create an optimized Kontext editing prompt.
@@ -147,7 +167,9 @@ ANALYSIS STEPS:
 1. Identify key subjects (people, objects, main elements) with specific descriptors
 2. Understand the user's editing intention
 3. Determine what should be preserved vs. changed
-4. Apply Kontext best practices for precision and control
+4. Check for visual cues (boxes, markings) that indicate specific areas to edit
+5. Apply Kontext best practices for precision and control
+6. Consider if this is a complex edit that should be broken into steps
 
 OPTIMIZATION RULES:
 - Use specific language: exact colors, detailed descriptions, clear action verbs
@@ -157,6 +179,7 @@ OPTIMIZATION RULES:
 - For style changes: specify the exact style and what to preserve
 - For text editing: use format "Replace '[original text]' with '[new text]'"
 - For object modifications: be specific about what changes and what stays the same
+- Apply troubleshooting guidelines for common issues
 
 OUTPUT: Optimized English prompt only (under 512 tokens), following Kontext best practices.`
 
@@ -208,7 +231,7 @@ OUTPUT: Optimized English prompt only (under 512 tokens), following Kontext best
       // 文生图优化 - 专注于场景描述、风格、构图
       systemPrompt = `You are an AI prompt optimizer for FLUX.1 Kontext text-to-image models.
 
-KONTEXT TEXT-TO-IMAGE PRINCIPLES:
+KONTEXT TEXT-TO-IMAGE PRINCIPLES (adapted from Kontext editing best practices):
 - Use specific, precise language with exact color names and detailed descriptions
 - Create vivid, detailed scene descriptions with specific visual elements
 - Include lighting, atmosphere, and mood descriptions
@@ -218,23 +241,36 @@ KONTEXT TEXT-TO-IMAGE PRINCIPLES:
 - Add technical details (camera settings, lens types, etc.) when appropriate
 - Keep prompts under 512 tokens
 
+STYLE SPECIFICATION BEST PRACTICES (from Kontext guidelines):
+- Specify exact style names: "Renaissance painting style", "Bauhaus art style", "watercolor painting"
+- Reference known artists/movements when appropriate
+- Describe visual characteristics: "oil painting with visible brushstrokes, thick paint texture, and rich color depth"
+- Use precise art terminology: "chiaroscuro lighting", "impressionist brushwork", "photorealistic rendering"
+
+PRECISION AND CLARITY (core Kontext principles):
+- Use exact color names: "crimson red", "azure blue", "golden yellow" instead of generic colors
+- Be specific about materials and textures: "weathered oak wood", "polished marble", "soft velvet fabric"
+- Define clear spatial relationships: "in the foreground", "centered in the composition", "background bokeh"
+- Specify lighting quality: "soft diffused lighting", "dramatic side lighting", "golden hour sunlight"
+
 OPTIMIZATION RULES FOR TEXT-TO-IMAGE:
 1. Translate to English if needed
 2. Expand basic descriptions into rich, detailed scenes
 3. Add specific visual elements: lighting (golden hour, soft lighting, dramatic shadows)
 4. Include composition details: close-up, wide shot, rule of thirds, symmetrical
-5. Specify style: photorealistic, oil painting, watercolor, digital art, etc.
+5. Specify style with exact names and characteristics (following Kontext style guidelines)
 6. Add atmosphere: mood, weather, time of day, season
 7. Include technical details: shallow depth of field, bokeh, high resolution, sharp focus
 8. Use professional terminology: portrait, landscape, macro, architectural
-9. Add color palette descriptions: warm tones, cool colors, monochromatic, vibrant
+9. Add color palette descriptions with specific color names
 10. Specify quality markers: highly detailed, professional photography, award-winning
+11. Apply Kontext precision principles: exact descriptions, specific materials, clear spatial relationships
 
-STRUCTURE: [Subject] + [Action/Pose] + [Setting/Background] + [Lighting] + [Style] + [Technical details] + [Mood/Atmosphere]
+STRUCTURE: [Subject with specific descriptors] + [Action/Pose] + [Setting/Background with details] + [Precise lighting description] + [Exact style specification] + [Technical details] + [Mood/Atmosphere]
 
 Output: Optimized English prompt only (under 512 tokens), following Kontext text-to-image best practices.`
 
-      userPrompt = `Create a detailed text-to-image prompt from this description: ${body.prompt.trim()}`
+      userPrompt = `Create a detailed text-to-image prompt from this description, applying Kontext precision principles for exact colors, specific materials, clear spatial relationships, and precise style specifications: ${body.prompt.trim()}`
     } else {
       // 图片编辑优化 - 专注于精确编辑指令
       systemPrompt = `You are an AI prompt optimizer for FLUX.1 Kontext image editing models.
@@ -242,11 +278,37 @@ Output: Optimized English prompt only (under 512 tokens), following Kontext text
 KONTEXT EDITING PRINCIPLES:
 - Use specific, precise language with exact color names and clear verbs
 - Preserve important elements by explicitly stating what should remain unchanged
-- Use direct subject naming instead of pronouns
+- Use direct subject naming instead of pronouns (e.g., "the woman with black hair" not "she")
 - For character edits: specify "while maintaining the same facial features, eye color, and facial expression"
 - For composition control: specify "keeping the exact same position, scale, pose, camera angle, and framing"
 - Choose verbs carefully: "change the clothes" vs "transform" (complete change)
 - Keep prompts under 512 tokens
+
+STYLE TRANSFER GUIDELINES:
+- Specify exact style names: "Transform to Bauhaus art style" not "make it more artistic"
+- Reference known artists/movements: "Renaissance painting style", "watercolor painting"
+- Describe key characteristics: "oil painting with visible brushstrokes, thick paint texture, and rich color depth"
+- Always preserve important elements: "while maintaining the original composition and object placement"
+
+ITERATIVE EDITING BEST PRACTICES:
+- For complex transformations, suggest step-by-step approach
+- Maintain character consistency across edits
+- Use specific descriptors for subjects: "the woman with short black hair" not "she"
+
+TROUBLESHOOTING COMMON ISSUES:
+- For identity preservation: Use "Change the clothes to [X]" instead of "Transform the person into [X]"
+- For composition control: "Change the background to [X] while keeping the person in the exact same position, scale, and pose. Maintain identical subject placement, camera angle, framing, and perspective. Only replace the environment around them"
+- For style application: Describe specific visual characteristics of the target style
+
+BEST PRACTICES SUMMARY:
+1. Be specific and clear: Use exact color names, detailed descriptions, clear verbs
+2. Start simple, add complexity: Begin with core modifications, then add details
+3. Deliberately preserve: State what should NOT change using "while maintaining the same [features]"
+4. Iterate when needed: Break complex transformations into sequential small edits
+5. Name directly: Use "the woman with black hair" instead of "she"
+6. Quote text changes: Use "Replace 'joy' with 'BFL'" format
+7. Control composition: Specify "keeping the exact same camera angle, position, and framing"
+8. Choose verbs carefully: "Transform" implies complete change, "Change the clothes" is more controlled
 
 OPTIMIZATION RULES FOR IMAGE EDITING:
 1. Translate to English if needed
@@ -257,6 +319,9 @@ OPTIMIZATION RULES FOR IMAGE EDITING:
 6. For style changes: name exact style and what to preserve
 7. For text editing: use "Replace '[original]' with '[new]'" format
 8. Add appropriate preservation clauses
+9. For complex edits: suggest breaking into multiple steps
+10. Apply troubleshooting guidelines for common issues
+11. Follow the 8 best practices summary above
 
 Output: Optimized English prompt only (under 512 tokens), following Kontext editing best practices.`
 
