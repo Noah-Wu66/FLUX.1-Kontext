@@ -20,36 +20,89 @@ export class GeminiUtils {
       max_tokens?: number
     }
   ): Promise<GeminiApiResult<string>> {
-    const messages: OpenAI.Chat.Completions.ChatCompletionMessageParam[] = []
+    try {
+      const messages: OpenAI.Chat.Completions.ChatCompletionMessageParam[] = []
 
-    if (systemMessage) {
-      messages.push({
-        role: 'system',
-        content: systemMessage
-      })
-    }
-
-    messages.push({
-      role: 'user',
-      content: prompt
-    })
-
-    const result = await geminiAPI.chat(
-      'gemini-2.5-flash',
-      messages,
-      options
-    )
-
-    if (result.success && result.data) {
-      return {
-        success: true,
-        data: result.data.choices[0]?.message?.content || ''
+      if (systemMessage) {
+        messages.push({
+          role: 'system',
+          content: systemMessage
+        })
       }
-    }
 
-    return {
-      success: false,
-      error: result.error
+      messages.push({
+        role: 'user',
+        content: prompt
+      })
+
+      console.log('GeminiUtils.textChat 开始调用:', {
+        messageCount: messages.length,
+        hasSystemMessage: !!systemMessage,
+        options
+      })
+
+      const result = await geminiAPI.chat(
+        'gemini-2.5-flash',
+        messages,
+        options
+      )
+
+      console.log('GeminiUtils.textChat API 调用结果:', {
+        success: result.success,
+        hasData: !!result.data,
+        error: result.error,
+        choicesLength: result.data?.choices?.length,
+        firstChoiceContent: result.data?.choices?.[0]?.message?.content?.substring(0, 100)
+      })
+
+      if (result.success && result.data) {
+        // 详细检查响应结构
+        console.log('GeminiUtils.textChat 详细响应检查:', {
+          hasChoices: !!result.data.choices,
+          choicesLength: result.data.choices?.length,
+          choicesArray: result.data.choices,
+          firstChoice: result.data.choices?.[0],
+          firstChoiceMessage: result.data.choices?.[0]?.message,
+          firstChoiceContent: result.data.choices?.[0]?.message?.content
+        })
+
+        const content = result.data.choices?.[0]?.message?.content
+        if (content && content.trim()) {
+          console.log('GeminiUtils.textChat 成功返回内容:', content.substring(0, 100) + '...')
+          return {
+            success: true,
+            data: content.trim()
+          }
+        } else {
+          console.error('GeminiUtils.textChat 响应内容为空:', {
+            content,
+            contentType: typeof content,
+            contentLength: content?.length,
+            choices: result.data.choices,
+            firstChoice: result.data.choices?.[0],
+            fullResponse: result.data
+          })
+          return {
+            success: false,
+            error: 'AI 返回的内容为空'
+          }
+        }
+      }
+
+      console.error('GeminiUtils.textChat 调用失败:', result.error)
+      return {
+        success: false,
+        error: result.error || 'AI 调用失败'
+      }
+    } catch (error) {
+      console.error('GeminiUtils.textChat 异常:', {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined
+      })
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'AI 调用异常'
+      }
     }
   }
 
@@ -65,40 +118,80 @@ export class GeminiUtils {
       max_tokens?: number
     }
   ): Promise<GeminiApiResult<string>> {
-    const messages: OpenAI.Chat.Completions.ChatCompletionMessageParam[] = [
-      {
-        role: 'user',
-        content: [
-          {
-            type: 'text',
-            text: prompt
-          },
-          {
-            type: 'image_url',
-            image_url: {
-              url: `data:image/${imageFormat};base64,${imageBase64}`
+    try {
+      const messages: OpenAI.Chat.Completions.ChatCompletionMessageParam[] = [
+        {
+          role: 'user',
+          content: [
+            {
+              type: 'text',
+              text: prompt
+            },
+            {
+              type: 'image_url',
+              image_url: {
+                url: `data:image/${imageFormat};base64,${imageBase64}`
+              }
             }
+          ]
+        }
+      ]
+
+      console.log('GeminiUtils.imageChat 开始调用:', {
+        promptLength: prompt.length,
+        imageFormat,
+        imageBase64Length: imageBase64.length,
+        options
+      })
+
+      const result = await geminiAPI.chat(
+        'gemini-2.5-flash',
+        messages,
+        options
+      )
+
+      console.log('GeminiUtils.imageChat API 调用结果:', {
+        success: result.success,
+        hasData: !!result.data,
+        error: result.error,
+        choicesLength: result.data?.choices?.length,
+        firstChoiceContent: result.data?.choices?.[0]?.message?.content?.substring(0, 100)
+      })
+
+      if (result.success && result.data) {
+        const content = result.data.choices?.[0]?.message?.content
+        if (content && content.trim()) {
+          console.log('GeminiUtils.imageChat 成功返回内容:', content.substring(0, 100) + '...')
+          return {
+            success: true,
+            data: content.trim()
           }
-        ]
+        } else {
+          console.error('GeminiUtils.imageChat 响应内容为空:', {
+            choices: result.data.choices,
+            firstChoice: result.data.choices?.[0]
+          })
+          return {
+            success: false,
+            error: 'AI 返回的内容为空'
+          }
+        }
       }
-    ]
 
-    const result = await geminiAPI.chat(
-      'gemini-2.5-flash',
-      messages,
-      options
-    )
-
-    if (result.success && result.data) {
+      console.error('GeminiUtils.imageChat 调用失败:', result.error)
       return {
-        success: true,
-        data: result.data.choices[0]?.message?.content || ''
+        success: false,
+        error: result.error || 'AI 调用失败'
       }
-    }
-
-    return {
-      success: false,
-      error: result.error
+    } catch (error) {
+      console.error('GeminiUtils.imageChat 异常:', {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined
+      })
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'AI 调用异常'
+      }
     }
   }
 

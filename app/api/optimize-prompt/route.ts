@@ -59,6 +59,13 @@ IMPORTANT: You must output the optimized prompt in English only. Do not add any 
 
 ${body.prompt.trim()}`
 
+    console.log('开始优化提示词:', {
+      originalPrompt: body.prompt.substring(0, 100) + '...',
+      model: body.model,
+      systemPromptLength: systemPrompt.length,
+      userPromptLength: userPrompt.length
+    })
+
     // 使用 Gemini 优化提示词
     const result = await GeminiUtils.textChat(
       userPrompt,
@@ -69,18 +76,41 @@ ${body.prompt.trim()}`
       }
     )
 
+    console.log('优化提示词结果:', {
+      success: result.success,
+      hasData: !!result.data,
+      dataLength: result.data?.length || 0,
+      error: result.error
+    })
+
     if (result.success && result.data) {
-      return NextResponse.json({
-        success: true,
-        optimizedPrompt: result.data.trim(),
-        originalPrompt: body.prompt.trim()
-      })
+      const optimizedPrompt = result.data.trim()
+      if (optimizedPrompt) {
+        console.log('提示词优化成功:', {
+          originalLength: body.prompt.length,
+          optimizedLength: optimizedPrompt.length,
+          optimizedPreview: optimizedPrompt.substring(0, 100) + '...'
+        })
+        return NextResponse.json({
+          success: true,
+          optimizedPrompt,
+          originalPrompt: body.prompt.trim()
+        })
+      } else {
+        console.error('优化后的提示词为空')
+        return NextResponse.json(
+          { success: false, error: '优化后的提示词为空，请重试' },
+          { status: 500 }
+        )
+      }
     } else {
       const errorMessage = result.error || 'AI 优化失败'
       console.error('Gemini API 调用失败:', {
         error: errorMessage,
         prompt: body.prompt.substring(0, 100) + '...',
-        model: body.model
+        model: body.model,
+        resultSuccess: result.success,
+        resultData: result.data
       })
       return NextResponse.json(
         { success: false, error: errorMessage },
@@ -90,10 +120,24 @@ ${body.prompt.trim()}`
   } catch (error) {
     console.error('优化提示词错误:', {
       error: error instanceof Error ? error.message : String(error),
-      stack: error instanceof Error ? error.stack : undefined
+      stack: error instanceof Error ? error.stack : undefined,
+      prompt: body?.prompt?.substring(0, 100) + '...',
+      model: body?.model
     })
+
+    let errorMessage = '服务器内部错误'
+    if (error instanceof Error) {
+      if (error.message.includes('fetch')) {
+        errorMessage = '网络连接错误，请检查网络设置'
+      } else if (error.message.includes('timeout')) {
+        errorMessage = '请求超时，请稍后重试'
+      } else if (error.message.includes('JSON')) {
+        errorMessage = '数据格式错误'
+      }
+    }
+
     return NextResponse.json(
-      { success: false, error: '服务器内部错误' },
+      { success: false, error: errorMessage },
       { status: 500 }
     )
   }

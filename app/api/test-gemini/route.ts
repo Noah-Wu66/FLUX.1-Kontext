@@ -52,13 +52,19 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   try {
     const { prompt } = await request.json()
-    
+
     if (!prompt) {
       return NextResponse.json({
         success: false,
         error: '请提供测试提示词'
       }, { status: 400 })
     }
+
+    console.log('测试 Gemini API 开始:', {
+      prompt: prompt.substring(0, 100) + '...',
+      hasApiKey: !!process.env.OPENAI_API_KEY,
+      baseUrl: process.env.OPENAI_BASE_URL
+    })
 
     // 测试提示词优化
     const result = await GeminiUtils.textChat(
@@ -70,10 +76,21 @@ export async function POST(request: NextRequest) {
       }
     )
 
+    console.log('测试 Gemini API 结果:', {
+      success: result.success,
+      hasData: !!result.data,
+      dataLength: result.data?.length || 0,
+      error: result.error
+    })
+
     return NextResponse.json({
       success: true,
       originalPrompt: prompt,
-      result
+      result,
+      config: {
+        hasApiKey: !!process.env.OPENAI_API_KEY,
+        baseUrl: process.env.OPENAI_BASE_URL
+      }
     })
 
   } catch (error) {

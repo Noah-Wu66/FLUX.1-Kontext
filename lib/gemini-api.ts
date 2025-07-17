@@ -81,8 +81,33 @@ export class GeminiAPI {
       console.log('Gemini API 响应成功:', {
         model,
         choices: response.choices?.length || 0,
-        usage: response.usage
+        usage: response.usage,
+        firstChoiceFinishReason: response.choices?.[0]?.finish_reason,
+        firstChoiceContentLength: response.choices?.[0]?.message?.content?.length || 0,
+        firstChoiceContentPreview: response.choices?.[0]?.message?.content?.substring(0, 100)
       })
+
+      // 验证响应数据的完整性
+      if (!response.choices || response.choices.length === 0) {
+        console.error('Gemini API 响应无效: 没有 choices')
+        return {
+          success: false,
+          error: 'AI 服务返回无效响应'
+        }
+      }
+
+      const firstChoice = response.choices[0]
+      if (!firstChoice.message || !firstChoice.message.content) {
+        console.error('Gemini API 响应无效: 没有消息内容', {
+          choice: firstChoice,
+          hasMessage: !!firstChoice.message,
+          hasContent: !!firstChoice.message?.content
+        })
+        return {
+          success: false,
+          error: 'AI 服务返回空内容'
+        }
+      }
 
       return {
         success: true,
