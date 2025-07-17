@@ -35,7 +35,7 @@ export function Menu({
       <ul className={cn(
         'menu-list',
         orientation === 'horizontal' 
-          ? 'flex flex-row items-center space-x-1 md:space-x-2' 
+          ? 'flex flex-row items-center space-x-1 pc:space-x-2'
           : 'flex flex-col space-y-1'
       )}>
         {items.map((item) => (

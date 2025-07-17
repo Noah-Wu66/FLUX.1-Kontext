@@ -94,10 +94,10 @@ export function ImageUpload({
           <img
             src={currentImageUrl}
             alt="上传的图片"
-            className="w-full h-40 sm:h-48 object-cover"
+            className="w-full h-40 pc:h-48 object-cover"
           />
           {/* 桌面端悬浮按钮 */}
-          <div className="absolute inset-0 bg-black bg-opacity-0 hover:bg-opacity-20 transition-all duration-200 items-center justify-center hidden sm:flex">
+          <div className="absolute inset-0 bg-black bg-opacity-0 hover:bg-opacity-20 transition-all duration-200 items-center justify-center hidden pc:flex">
             <Button
               variant="secondary"
               size="sm"
@@ -110,7 +110,7 @@ export function ImageUpload({
             </Button>
           </div>
           {/* 移动端固定按钮 */}
-          <div className="absolute top-2 right-2 sm:hidden">
+          <div className="absolute top-2 right-2 pc:hidden">
             <Button
               variant="secondary"
               size="sm"
@@ -149,14 +149,14 @@ export function ImageUpload({
         <div className="flex flex-col items-center justify-center h-full">
           {uploading ? (
             <>
-              <div className="w-8 h-8 sm:w-12 sm:h-12 border-4 border-primary-200 border-t-primary-600 rounded-full animate-spin mb-2 sm:mb-4" />
-              <p className="text-xs sm:text-sm text-gray-600">上传中...</p>
+              <div className="w-8 h-8 pc:w-12 pc:h-12 border-4 border-primary-200 border-t-primary-600 rounded-full animate-spin mb-2 pc:mb-4" />
+              <p className="text-xs pc:text-sm text-gray-600">上传中...</p>
             </>
           ) : (
             <>
-              <ImageIcon className="w-8 h-8 sm:w-12 sm:h-12 text-gray-400 mb-2 sm:mb-4" />
-              <p className="text-xs sm:text-sm text-gray-600 mb-1 sm:mb-2">
-                <span className="hidden sm:inline">拖拽图片到此处或</span>点击上传
+              <ImageIcon className="w-8 h-8 pc:w-12 pc:h-12 text-gray-400 mb-2 pc:mb-4" />
+              <p className="text-xs pc:text-sm text-gray-600 mb-1 pc:mb-2">
+                <span className="hidden pc:inline">拖拽图片到此处或</span>点击上传
               </p>
               <p className="text-xs text-gray-500">
                 支持 JPEG、PNG、WebP 格式，最大 10MB

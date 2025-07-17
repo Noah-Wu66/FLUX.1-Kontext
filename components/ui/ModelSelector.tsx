@@ -194,14 +194,14 @@ export function ModelSelector({
         )}
       >
         <div className="flex-1 min-w-0">
-          <div className="text-sm md:text-sm font-medium text-gray-900 truncate">
+          <div className="text-sm pc:text-base font-medium text-gray-900 truncate">
             {displayInfo.categoryName} — {displayInfo.modelName}
           </div>
-          <div className="text-xs md:text-xs text-gray-500 truncate mt-0.5">
+          <div className="text-xs pc:text-sm text-gray-500 truncate mt-0.5">
             {displayInfo.description}
           </div>
         </div>
-        <ChevronDown className="w-4 h-4 md:w-4 md:h-4 text-gray-400 flex-shrink-0 ml-2 transition-transform duration-200" />
+        <ChevronDown className="w-4 h-4 pc:w-5 pc:h-5 text-gray-400 flex-shrink-0 ml-2 transition-transform duration-200" />
       </button>
 
       {helperText && (
@@ -211,58 +211,58 @@ export function ModelSelector({
       {/* 选择弹窗 */}
       {isOpen && (
         <div
-          className="fixed inset-0 z-50 bg-black bg-opacity-50 md:flex md:items-center md:justify-center md:p-4"
+          className="fixed inset-0 z-50 bg-black bg-opacity-50 pc:flex pc:items-center pc:justify-center pc:p-4"
           onClick={handleBackdropClick}
         >
           {/* 移动端全屏弹窗 */}
           <div
-            className="bg-white h-full w-full md:h-auto md:max-h-[80vh] md:max-w-md md:rounded-lg md:shadow-xl overflow-hidden animate-slide-up md:animate-none flex flex-col"
+            className="bg-white h-full w-full pc:h-auto pc:max-h-[80vh] pc:max-w-md pc:rounded-lg pc:shadow-xl overflow-hidden animate-slide-up pc:animate-none flex flex-col"
             onTouchStart={onTouchStart}
             onTouchMove={onTouchMove}
             onTouchEnd={onTouchEnd}
           >
             {/* 移动端滑动指示器 */}
-            <div className="md:hidden flex justify-center pt-2 pb-1">
+            <div className="pc:hidden flex justify-center pt-2 pb-1">
               <div className="w-8 h-1 bg-gray-300 rounded-full"></div>
             </div>
 
             {/* 弹窗头部 */}
-            <div className="flex items-center justify-between p-4 md:p-4 border-b border-gray-200 bg-white sticky top-0 z-10 pt-safe">
-              <h3 className="text-lg md:text-lg font-medium text-gray-900">
+            <div className="flex items-center justify-between p-4 pc:p-6 border-b border-gray-200 bg-white sticky top-0 z-10 pt-safe">
+              <h3 className="text-lg pc:text-xl font-medium text-gray-900">
                 {selectedCategory ? '选择模型' : '选择生图类型'}
               </h3>
               <button
                 onClick={handleClose}
-                className="text-gray-400 hover:text-gray-600 active:text-gray-700 transition-colors p-2 -m-2 min-h-[44px] min-w-[44px] flex items-center justify-center touch-feedback"
+                className="text-gray-400 hover:text-gray-600 active:text-gray-700 transition-colors p-2 -m-2 min-h-[48px] min-w-[48px] flex items-center justify-center touch-feedback"
                 aria-label="关闭"
               >
-                <X className="w-5 h-5 md:w-5 md:h-5" />
+                <X className="w-5 h-5 pc:w-6 pc:h-6" />
               </button>
             </div>
 
             {/* 弹窗内容 */}
-            <div className="flex-1 p-4 md:p-4 overflow-y-auto pb-safe mobile-scroll">
+            <div className="flex-1 p-4 pc:p-6 overflow-y-auto pb-safe mobile-scroll">
               {!selectedCategory ? (
                 // 显示分类列表
-                <div className="space-y-4 md:space-y-3">
+                <div className="space-y-4 pc:space-y-3">
                   {modelCategories.map((category) => (
                     <button
                       key={category.id}
                       onClick={() => handleCategorySelect(category.id)}
-                      className="w-full p-4 md:p-3 text-left border border-gray-200 rounded-lg hover:border-primary-300 hover:bg-primary-50 active:bg-primary-100 transition-all duration-200 min-h-[60px] md:min-h-[auto] flex flex-col justify-center touch-feedback"
+                      className="w-full p-4 pc:p-3 text-left border border-gray-200 rounded-lg hover:border-primary-300 hover:bg-primary-50 active:bg-primary-100 transition-all duration-200 min-h-[60px] pc:min-h-[auto] flex flex-col justify-center touch-feedback"
                     >
-                      <div className="font-medium text-gray-900 text-base md:text-sm">{category.name}</div>
-                      <div className="text-sm md:text-sm text-gray-500 mt-1">{category.description}</div>
+                      <div className="font-medium text-gray-900 text-base pc:text-sm">{category.name}</div>
+                      <div className="text-sm pc:text-sm text-gray-500 mt-1">{category.description}</div>
                     </button>
                   ))}
                 </div>
               ) : (
                 // 显示选中分类的模型列表
-                <div className="space-y-4 md:space-y-3">
+                <div className="space-y-4 pc:space-y-3">
                   {/* 返回按钮 */}
                   <button
                     onClick={handleBackToCategories}
-                    className="text-sm md:text-sm text-primary-600 hover:text-primary-700 active:text-primary-800 mb-4 md:mb-3 p-2 -m-2 min-h-[44px] flex items-center transition-all duration-200 touch-feedback"
+                    className="text-sm pc:text-base text-primary-600 hover:text-primary-700 active:text-primary-800 mb-4 pc:mb-3 p-2 -m-2 min-h-[48px] flex items-center transition-all duration-200 touch-feedback"
                   >
                     ← 返回分类选择
                   </button>
@@ -274,14 +274,14 @@ export function ModelSelector({
                         key={model.value}
                         onClick={() => handleModelSelect(model.value)}
                         className={cn(
-                          'w-full p-4 md:p-3 text-left border rounded-lg transition-all duration-200 min-h-[60px] md:min-h-[auto] flex flex-col justify-center touch-feedback',
+                          'w-full p-4 pc:p-3 text-left border rounded-lg transition-all duration-200 min-h-[60px] pc:min-h-[auto] flex flex-col justify-center touch-feedback',
                           value === model.value
                             ? 'border-primary-500 bg-primary-50 ring-2 ring-primary-200'
                             : 'border-gray-200 hover:border-primary-300 hover:bg-primary-50 active:bg-primary-100'
                         )}
                       >
-                        <div className="font-medium text-gray-900 text-base md:text-sm">{model.name}</div>
-                        <div className="text-sm md:text-sm text-gray-500 mt-1">{model.description}</div>
+                        <div className="font-medium text-gray-900 text-base pc:text-sm">{model.name}</div>
+                        <div className="text-sm pc:text-sm text-gray-500 mt-1">{model.description}</div>
                         {value === model.value && (
                           <div className="text-xs text-primary-600 mt-1 font-medium">✓ 当前选中</div>
                         )}

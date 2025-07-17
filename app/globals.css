@@ -129,7 +129,7 @@
   .card {
     @apply bg-white rounded-xl shadow-sm border border-gray-200 p-6;
     /* 移动端优化：减少小屏幕上的内边距 */
-    @apply sm:p-6 p-4;
+    @apply pc:p-6 p-4;
   }
 
   .loading-spinner {
@@ -138,20 +138,20 @@
 
   /* 移动端优化：响应式间距 */
   .mobile-padding {
-    @apply px-4 sm:px-6 lg:px-8;
+    @apply px-4 pc:px-6 lg:px-8;
   }
 
   .mobile-margin {
-    @apply mx-4 sm:mx-6 lg:mx-8;
+    @apply mx-4 pc:px-6 lg:px-8;
   }
 
   /* 移动端优化：响应式文字大小 */
   .responsive-title {
-    @apply text-2xl sm:text-3xl lg:text-4xl;
+    @apply text-2xl pc:text-3xl lg:text-4xl;
   }
 
   .responsive-subtitle {
-    @apply text-lg sm:text-xl lg:text-2xl;
+    @apply text-lg pc:text-xl lg:text-2xl;
   }
 
   /* 移动端优化：触摸友好的按钮 */
@@ -164,7 +164,7 @@
   /* 移动端优化：模态框 */
   .mobile-modal {
     @apply fixed inset-0 z-50 flex items-center justify-center;
-    @apply p-4 sm:p-6 lg:p-8;
+    @apply p-4 pc:p-6 lg:p-8;
   }
 
   .mobile-modal-content {
@@ -172,19 +172,25 @@
     @apply bg-white rounded-xl shadow-xl;
   }
 
-  /* 移动端优化：网格布局 */
+  /* 响应式网格布局 - 基于768px断点 */
   .responsive-grid {
-    @apply grid gap-4 sm:gap-6;
-    @apply grid-cols-1 sm:grid-cols-2 lg:grid-cols-3;
+    @apply grid gap-4 pc:gap-6;
+    @apply grid-cols-1 pc:grid-cols-2 lg:grid-cols-3;
   }
 
   .responsive-grid-2 {
-    @apply grid gap-4 sm:gap-6;
-    @apply grid-cols-1 lg:grid-cols-2;
+    @apply grid gap-4 pc:gap-6 lg:gap-8;
+    @apply grid-cols-1 pc:grid-cols-2;
   }
 
-  /* 移动端特定优化 */
-  @media (max-width: 640px) {
+  /* 主要布局网格 - 移动端单列，PC端双列 */
+  .main-layout-grid {
+    @apply grid gap-6 pc:gap-8;
+    @apply grid-cols-1 pc:grid-cols-2;
+  }
+
+  /* 移动端特定优化 (< 768px) */
+  @media (max-width: 767px) {
     /* 移动端滚动优化 */
     .mobile-scroll {
       -webkit-overflow-scrolling: touch;
@@ -198,16 +204,16 @@
 
     /* 移动端按钮组优化 */
     .mobile-button-group {
-      @apply flex flex-col space-y-2;
+      @apply flex flex-col space-y-3;
     }
 
     .mobile-button-group > * {
-      @apply w-full;
+      @apply w-full min-h-[48px];
     }
 
     /* 移动端卡片优化 */
     .mobile-card-compact {
-      @apply p-3 rounded-lg;
+      @apply p-4 rounded-lg;
     }
 
     /* 移动端文本优化 */
@@ -217,19 +223,49 @@
 
     /* 移动端间距优化 */
     .mobile-spacing-tight {
-      @apply space-y-3;
+      @apply space-y-4;
     }
 
-    /* 移动端网格优化 */
+    /* 移动端网格优化 - 强制单列布局 */
     .mobile-grid-tight {
-      @apply grid-cols-1 gap-3;
+      @apply grid-cols-1 gap-4;
+    }
+
+    /* 移动端布局强制单列 */
+    .mobile-single-column {
+      @apply grid-cols-1 !important;
+    }
+
+    /* 移动端触摸优化 */
+    .mobile-touch-target {
+      @apply min-h-[48px] min-w-[48px];
+    }
+
+    /* 移动端文字大小优化 */
+    .mobile-text-size {
+      font-size: 16px; /* 防止iOS自动缩放 */
     }
   }
 
-  /* 平板端优化 */
-  @media (min-width: 641px) and (max-width: 1024px) {
-    .tablet-grid {
-      @apply grid-cols-2 gap-4;
+  /* PC端优化 (≥ 768px) */
+  @media (min-width: 768px) {
+    /* PC端多列布局 */
+    .pc-multi-column {
+      @apply grid-cols-2 gap-6 lg:gap-8;
+    }
+
+    /* PC端宽松间距 */
+    .pc-spacing {
+      @apply space-y-6 lg:space-y-8;
+    }
+
+    /* PC端按钮组 */
+    .pc-button-group {
+      @apply flex flex-row space-x-4 space-y-0;
+    }
+
+    .pc-button-group > * {
+      @apply w-auto;
     }
   }
 
@@ -242,7 +278,7 @@
   }
 
   /* 移动端模态框优化 */
-  @media (max-width: 640px) {
+  @media (max-width: 767px) {
     .mobile-modal-fullscreen {
       @apply fixed inset-0 m-0 rounded-none max-w-none max-h-none;
     }
@@ -250,6 +286,11 @@
     .mobile-modal-bottom {
       @apply fixed bottom-0 left-0 right-0 top-auto rounded-t-xl rounded-b-none;
       max-height: 90vh;
+    }
+
+    /* 移动端模态框内容优化 */
+    .mobile-modal-content {
+      @apply p-4 space-y-4;
     }
   }
 
@@ -279,10 +320,20 @@
   }
 
   /* 移动端触摸反馈 */
-  @media (max-width: 768px) {
+  @media (max-width: 767px) {
     .touch-feedback:active {
       transform: scale(0.98);
       transition: transform 0.1s ease-in-out;
+    }
+
+    /* 移动端表单元素优化 */
+    input, textarea, select {
+      font-size: 16px !important; /* 防止iOS缩放 */
+    }
+
+    /* 移动端按钮优化 */
+    button, [role="button"] {
+      @apply min-h-[48px] min-w-[48px];
     }
   }
 }

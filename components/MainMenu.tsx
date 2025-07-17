@@ -91,9 +91,9 @@ export function MainMenu({ className, onMenuItemSelect }: MainMenuProps) {
 
   return (
     <div className={cn('main-menu', className)}>
-      {/* 桌面端菜单 */}
-      <div className="hidden md:block">
-        <Menu 
+      {/* PC端菜单 (≥768px) */}
+      <div className="hidden pc:block">
+        <Menu
           items={menuItems}
           orientation="horizontal"
           onMenuItemClick={handleMenuItemClick}
@@ -101,18 +101,18 @@ export function MainMenu({ className, onMenuItemSelect }: MainMenuProps) {
         />
       </div>
 
-      {/* 移动端菜单 */}
-      <div className="md:hidden">
-        <MenuToggle 
+      {/* 移动端菜单 (<768px) */}
+      <div className="pc:hidden">
+        <MenuToggle
           isOpen={isMobileMenuOpen}
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
         />
-        
+
         {/* 移动端菜单面板 */}
         {isMobileMenuOpen && (
           <div className="absolute top-full left-0 right-0 bg-white border-t border-gray-200 shadow-lg z-50">
             <div className="max-w-7xl mx-auto px-4 py-4">
-              <MobileMenu 
+              <MobileMenu
                 items={menuItems}
                 onMenuItemClick={handleMenuItemClick}
               />
@@ -156,7 +156,7 @@ function MobileMenu({ items, onMenuItemClick }: MobileMenuProps) {
                 onMenuItemClick(item)
               }
             }}
-            className="flex items-center justify-between w-full px-4 py-3 text-left bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+            className="flex items-center justify-between w-full px-4 py-4 text-left bg-gray-50 rounded-lg hover:bg-gray-100 active:bg-gray-200 transition-colors touch-feedback min-h-[48px]"
           >
             <div className="flex items-center">
               {item.icon && (
@@ -178,17 +178,17 @@ function MobileMenu({ items, onMenuItemClick }: MobileMenuProps) {
 
           {/* 二级菜单项 */}
           {item.children && expandedItems.has(item.id) && (
-            <div className="mt-2 ml-4 space-y-1">
+            <div className="mt-3 ml-4 space-y-2">
               {item.children.map((child) => (
                 <button
                   key={child.id}
                   onClick={() => onMenuItemClick(child)}
-                  className="flex items-center w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+                  className="flex items-center w-full px-4 py-3 text-left text-sm text-gray-700 hover:bg-gray-100 active:bg-gray-200 rounded-lg transition-colors touch-feedback min-h-[48px]"
                 >
                   {child.icon && (
                     <span className="mr-3 flex-shrink-0">{child.icon}</span>
                   )}
-                  <span>{child.label}</span>
+                  <span className="font-medium">{child.label}</span>
                 </button>
               ))}
             </div>

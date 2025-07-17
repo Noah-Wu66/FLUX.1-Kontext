@@ -51,14 +51,14 @@ export function Toast({ type, title, message, duration = 5000, onClose }: ToastP
   return (
     <div
       className={cn(
-        'fixed top-4 right-4 left-4 sm:left-auto max-w-sm w-full sm:w-auto bg-white border rounded-lg shadow-lg p-3 sm:p-4 transition-all duration-300 z-50',
+        'fixed top-4 right-4 left-4 pc:left-auto max-w-sm w-full pc:w-auto bg-white border rounded-lg shadow-lg p-3 pc:p-4 transition-all duration-300 z-50',
         toastStyles[type],
         isVisible ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-0'
       )}
     >
       <div className="flex">
         <div className="flex-shrink-0">
-          <Icon className={cn('h-4 w-4 sm:h-5 sm:w-5', iconStyles[type])} />
+          <Icon className={cn('h-4 w-4 pc:h-5 pc:w-5', iconStyles[type])} />
         </div>
         <div className="ml-2 sm:ml-3 flex-1 min-w-0">
           <p className="text-xs sm:text-sm font-medium truncate">{title}</p>

@@ -29,7 +29,7 @@ export function Select({
       {label && (
         <label
           htmlFor={selectId}
-          className="block text-sm font-medium text-gray-700 mb-1"
+          className="block text-sm pc:text-base font-medium text-gray-700 mb-2"
         >
           {label}
         </label>
@@ -37,8 +37,8 @@ export function Select({
       <select
         id={selectId}
         className={cn(
-          'w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors duration-200 bg-white',
-          'min-h-[44px] text-base', // 移动端优化：确保触摸目标尺寸，防止iOS缩放
+          'w-full px-3 pc:px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors duration-200 bg-white',
+          'min-h-[48px] text-base mobile-text-size', // 移动端优化：确保触摸目标尺寸，防止iOS缩放
           error
             ? 'border-red-300 focus:ring-red-500'
             : 'border-gray-300',
@@ -53,10 +53,10 @@ export function Select({
         ))}
       </select>
       {error && (
-        <p className="mt-1 text-sm text-red-600">{error}</p>
+        <p className="mt-2 text-sm pc:text-base text-red-600">{error}</p>
       )}
       {helperText && !error && (
-        <p className="mt-1 text-sm text-gray-500">{helperText}</p>
+        <p className="mt-2 text-sm pc:text-base text-gray-500">{helperText}</p>
       )}
     </div>
   )

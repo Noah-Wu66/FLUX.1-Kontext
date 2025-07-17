@@ -1,7 +1,7 @@
 'use client'
 
-import React, { useState, useMemo } from 'react'
-import { Wand2, Settings, Shuffle, Sparkles } from 'lucide-react'
+import React, { useState, useMemo, useEffect } from 'react'
+import { Wand2, Settings, Shuffle, Sparkles, AlertTriangle } from 'lucide-react'
 import { Button } from './ui/Button'
 import { Input } from './ui/Input'
 import { Select } from './ui/Select'
@@ -69,6 +69,7 @@ export function GenerationForm({ onGenerate, loading = false, defaultPrompt = ''
   const [optimizingPrompt, setOptimizingPrompt] = useState(false)
   const [enableOptimization, setEnableOptimization] = useState(true) // 默认启用优化
   const [errors, setErrors] = useState<Record<string, string>>({})
+  const [showOptimizationWarning, setShowOptimizationWarning] = useState(false)
 
   // 自动检测相关状态
   const [detectedRatio, setDetectedRatio] = useState<Exclude<AspectRatio, 'auto'> | ''>('')
@@ -197,6 +198,45 @@ export function GenerationForm({ onGenerate, loading = false, defaultPrompt = ''
     setUsePreset(true)
     setPrompt('') // 清空自定义提示词
   }
+
+  // 处理优化提示词选项变化
+  const handleOptimizationChange = (checked: boolean) => {
+    if (!checked && enableOptimization) {
+      // 用户尝试关闭优化，显示警告
+      setShowOptimizationWarning(true)
+    } else {
+      // 用户开启优化，直接设置
+      setEnableOptimization(checked)
+    }
+  }
+
+  // 确认关闭优化
+  const handleConfirmDisableOptimization = () => {
+    setEnableOptimization(false)
+    setShowOptimizationWarning(false)
+  }
+
+  // 继续使用优化
+  const handleKeepOptimization = () => {
+    setShowOptimizationWarning(false)
+    // enableOptimization 保持 true，不需要改变
+  }
+
+  // 处理 ESC 键关闭弹窗
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && showOptimizationWarning) {
+        handleKeepOptimization() // ESC 键默认保持优化开启
+      }
+    }
+
+    if (showOptimizationWarning) {
+      document.addEventListener('keydown', handleKeyDown)
+      return () => {
+        document.removeEventListener('keydown', handleKeyDown)
+      }
+    }
+  }, [showOptimizationWarning])
 
   // 优化提示词（支持单图和多图分析）
   const optimizePrompt = async (promptText?: string, imageUrl?: string, imageUrls?: string[]) => {
@@ -476,7 +516,7 @@ export function GenerationForm({ onGenerate, loading = false, defaultPrompt = ''
               placeholder="描述你想要生成的图片..."
               value={prompt}
               onChange={(e) => setPrompt(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors duration-200 min-h-[88px] resize-none text-base"
+              className="w-full px-3 pc:px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors duration-200 min-h-[100px] pc:min-h-[88px] resize-none text-base mobile-text-size"
               rows={3}
             />
 
@@ -487,7 +527,7 @@ export function GenerationForm({ onGenerate, loading = false, defaultPrompt = ''
                   type="checkbox"
                   id="enableOptimization"
                   checked={enableOptimization}
-                  onChange={(e) => setEnableOptimization(e.target.checked)}
+                  onChange={(e) => handleOptimizationChange(e.target.checked)}
                   className="w-4 h-4 text-primary-600 bg-gray-100 border-gray-300 rounded focus:ring-primary-500 focus:ring-2"
                 />
                 <label htmlFor="enableOptimization" className="text-sm font-medium text-gray-700">
@@ -500,12 +540,6 @@ export function GenerationForm({ onGenerate, loading = false, defaultPrompt = ''
             {errors.prompt && (
               <p className="mt-1 text-sm text-red-600">{errors.prompt}</p>
             )}
-            <p className="mt-1 text-sm text-gray-500">
-              {model.includes('text-to-image')
-                ? '描述您想要生成的图片（可以很简单）。'
-                : '详细描述你想要的图片内容、风格、颜色等。'
-              }
-            </p>
           </div>
         ) : usePreset ? (
           // 图片编辑模型：预设模式
@@ -554,7 +588,7 @@ export function GenerationForm({ onGenerate, loading = false, defaultPrompt = ''
                   placeholder="描述你想要的图片编辑效果..."
                   value={prompt}
                   onChange={(e) => setPrompt(e.target.value)}
-                  className="w-full px-3 py-2 pr-24 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors duration-200 min-h-[88px] resize-none text-base"
+                  className="w-full px-3 pc:px-4 py-3 pr-24 pc:pr-28 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors duration-200 min-h-[100px] pc:min-h-[88px] resize-none text-base mobile-text-size"
                   rows={3}
                 />
                 {/* 预设模式按钮 - 右上角 */}
@@ -579,7 +613,7 @@ export function GenerationForm({ onGenerate, loading = false, defaultPrompt = ''
                   type="checkbox"
                   id="enableOptimization2"
                   checked={enableOptimization}
-                  onChange={(e) => setEnableOptimization(e.target.checked)}
+                  onChange={(e) => handleOptimizationChange(e.target.checked)}
                   className="w-4 h-4 text-primary-600 bg-gray-100 border-gray-300 rounded focus:ring-primary-500 focus:ring-2"
                 />
                 <label htmlFor="enableOptimization2" className="text-sm font-medium text-gray-700">
@@ -592,9 +626,6 @@ export function GenerationForm({ onGenerate, loading = false, defaultPrompt = ''
             {errors.prompt && (
               <p className="mt-1 text-sm text-red-600">{errors.prompt}</p>
             )}
-            <p className="mt-1 text-sm text-gray-500">
-              描述您想要的编辑效果（可以很简单）。也可以点击右上角的预设模式按钮使用 AI 预设。
-            </p>
           </div>
         )}
 
@@ -653,7 +684,7 @@ export function GenerationForm({ onGenerate, loading = false, defaultPrompt = ''
         )}
 
         {/* 基础设置 */}
-        <div className="space-y-4 sm:space-y-0 sm:grid sm:grid-cols-2 sm:gap-4">
+        <div className="space-y-4 pc:space-y-0 pc:grid pc:grid-cols-2 pc:gap-6">
           <div>
             <Select
               label="图片比例"
@@ -702,8 +733,8 @@ export function GenerationForm({ onGenerate, loading = false, defaultPrompt = ''
           </Button>
 
           {showAdvanced && (
-            <div className="space-y-4 p-3 sm:p-4 bg-gray-50 rounded-lg">
-              <div className="space-y-4 sm:space-y-0 sm:grid sm:grid-cols-2 sm:gap-4">
+            <div className="space-y-4 pc:space-y-6 p-4 pc:p-6 bg-gray-50 rounded-lg">
+              <div className="space-y-4 pc:space-y-0 pc:grid pc:grid-cols-2 pc:gap-6">
                 <div>
                   <Input
                     label="引导强度"
@@ -729,7 +760,7 @@ export function GenerationForm({ onGenerate, loading = false, defaultPrompt = ''
                 </div>
               </div>
 
-              <div className="space-y-4 sm:space-y-0 sm:grid sm:grid-cols-2 sm:gap-4">
+              <div className="space-y-4 pc:space-y-0 pc:grid pc:grid-cols-2 pc:gap-6">
                 <div>
                   <Select
                     label="安全等级"
@@ -741,10 +772,10 @@ export function GenerationForm({ onGenerate, loading = false, defaultPrompt = ''
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm pc:text-base font-medium text-gray-700 mb-2">
                     随机种子
                   </label>
-                  <div className="flex gap-2">
+                  <div className="flex gap-2 pc:gap-3">
                     <Input
                       type="number"
                       placeholder="留空为随机"
@@ -757,7 +788,7 @@ export function GenerationForm({ onGenerate, loading = false, defaultPrompt = ''
                       type="button"
                       variant="outline"
                       onClick={handleRandomSeed}
-                      className="mt-0 self-start"
+                      className="mt-0 self-start min-w-[48px]"
                       size="md"
                     >
                       <Shuffle className="w-4 h-4" />
@@ -770,13 +801,13 @@ export function GenerationForm({ onGenerate, loading = false, defaultPrompt = ''
         </div>
 
         {/* 生成按钮 */}
-        <div className="flex justify-center pt-2">
+        <div className="flex justify-center pt-4 pc:pt-6">
           <Button
             type="submit"
             loading={loading || generatingPresetPrompt || optimizingPrompt}
             disabled={loading || generatingPresetPrompt || optimizingPrompt || (usePreset && !selectedPreset)}
             size="lg"
-            className="w-full sm:w-auto min-w-[200px]"
+            className="w-full pc:w-auto pc:min-w-[240px] min-h-[52px]"
           >
             <Wand2 className="w-5 h-5 mr-2" />
             {loading ? '生成中...' :
@@ -786,6 +817,54 @@ export function GenerationForm({ onGenerate, loading = false, defaultPrompt = ''
           </Button>
         </div>
       </form>
+
+      {/* 优化提示词警告弹窗 */}
+      {showOptimizationWarning && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+          onClick={handleKeepOptimization}
+        >
+          <div
+            className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4 mobile-modal-content"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="p-4 pc:p-6">
+              <div className="flex items-center mb-4 pc:mb-6">
+                <AlertTriangle className="w-6 h-6 text-amber-500 mr-3" />
+                <h3 className="text-lg pc:text-xl font-semibold text-gray-900">关闭提示词优化</h3>
+              </div>
+
+              <div className="mb-6 pc:mb-8 space-y-3 pc:space-y-4">
+                <p className="text-gray-700 text-sm pc:text-base">
+                  如果您不是专业的提示词工程师或者没有丰富的 AI 绘图经验，我们强烈建议保持此功能开启。
+                </p>
+                <p className="text-gray-600 text-xs pc:text-sm">
+                  优化功能可以帮助您获得更好的生成效果，提高成功率并减少不必要的重试。
+                </p>
+              </div>
+
+              <div className="flex flex-col pc:flex-row gap-3 mobile-button-group pc:pc-button-group">
+                <Button
+                  type="button"
+                  variant="primary"
+                  onClick={handleKeepOptimization}
+                  className="flex-1"
+                >
+                  继续使用优化
+                </Button>
+                <Button
+                  type="button"
+                  variant="secondary"
+                  onClick={handleConfirmDisableOptimization}
+                  className="flex-1"
+                >
+                  确认关闭
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </Card>
   )
 }

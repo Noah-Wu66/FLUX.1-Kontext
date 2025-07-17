@@ -24,6 +24,10 @@ module.exports = {
       screens: {
         'xs': '320px',
         // 添加超小屏幕断点，确保在最小的移动设备上也能正常显示
+        'mobile': { 'max': '767px' },
+        // 移动端：屏幕宽度 < 768px
+        'pc': '768px',
+        // PC端：屏幕宽度 ≥ 768px，覆盖默认的md断点
       },
       spacing: {
         'safe-top': 'env(safe-area-inset-top)',

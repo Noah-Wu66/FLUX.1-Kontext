@@ -33,15 +33,15 @@ export default function RootLayout({
       <body className={inter.className}>
         <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
           <Header />
-          <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
+          <main className="max-w-7xl mx-auto px-4 pc:px-6 lg:px-8 py-4 pc:py-6 lg:py-8">
             {children}
           </main>
 
           {/* 页脚 */}
-          <footer className="bg-gray-50 border-t border-gray-200 mt-12 sm:mt-16">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+          <footer className="bg-gray-50 border-t border-gray-200 mt-12 pc:mt-16">
+            <div className="max-w-7xl mx-auto px-4 pc:px-6 lg:px-8 py-6 pc:py-8">
               <div className="text-center">
-                <p className="text-sm sm:text-base text-gray-600">
+                <p className="text-sm pc:text-base text-gray-600">
                   基于 FLUX.1 Kontext API 构建 |
                   <a href="https://fal.ai" target="_blank" rel="noopener noreferrer" className="text-primary-600 hover:text-primary-700 ml-1">
                     Powered by FAL.ai
