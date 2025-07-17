@@ -101,8 +101,18 @@ export class GeminiAPI {
         console.error('Gemini API 响应无效: 没有消息内容', {
           choice: firstChoice,
           hasMessage: !!firstChoice.message,
-          hasContent: !!firstChoice.message?.content
+          hasContent: !!firstChoice.message?.content,
+          finishReason: firstChoice.finish_reason
         })
+
+        // 如果是因为长度限制导致的空内容，提供更具体的错误信息
+        if (firstChoice.finish_reason === 'length') {
+          return {
+            success: false,
+            error: 'AI 响应被截断，请尝试缩短提示词或联系管理员'
+          }
+        }
+
         return {
           success: false,
           error: 'AI 服务返回空内容'

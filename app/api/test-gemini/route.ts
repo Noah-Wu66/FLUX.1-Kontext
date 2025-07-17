@@ -27,8 +27,7 @@ export async function GET() {
       '请回复"测试成功"',
       '你是一个测试助手，请简短回复。',
       {
-        temperature: 0.1,
-        max_tokens: 50
+        temperature: 0.1
       }
     )
 
@@ -68,11 +67,10 @@ export async function POST(request: NextRequest) {
 
     // 测试提示词优化
     const result = await GeminiUtils.textChat(
-      `Please optimize the following prompt (translate to English if needed and optimize): ${prompt}`,
-      'You are a professional AI image generation prompt optimization expert. Please optimize the user\'s prompt to make it more suitable for image generation. Output the optimized prompt in English only. Do not add any explanations.',
+      `Please optimize this prompt for image generation: ${prompt}`,
+      'You are an AI prompt optimizer. Optimize the prompt for image generation. Output optimized English prompt only.',
       {
-        temperature: 0.7,
-        max_tokens: 200
+        temperature: 0.7
       }
     )
 

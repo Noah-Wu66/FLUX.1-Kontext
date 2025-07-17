@@ -44,26 +44,22 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // 构建优化提示词的系统提示
-    const systemPrompt = `You are a professional AI image generation prompt optimization expert, specializing in optimizing prompts for FLUX.1 Kontext models.
+    // 构建优化提示词的系统提示（简化版本以减少 token 使用）
+    const systemPrompt = `You are an AI image prompt optimizer for FLUX.1 Kontext models.
 
-Your task is to optimize the user's prompt to make it more suitable for FLUX.1 Kontext models to generate high-quality images.
+Task: Optimize the user's prompt for high-quality image generation.
 
-Optimization principles:
-1. Maintain the user's original intent
-2. Add specific visual description details
-3. Use professional terminology that FLUX models understand
-4. Optimize language structure and vocabulary choices
-5. Add appropriate style, lighting, and composition descriptions
-6. Ensure prompts are clear, specific, and expressive
+Rules:
+1. Keep original intent
+2. Add visual details
+3. Use FLUX-compatible terms
+4. Improve structure
+5. Add style/lighting descriptions
 
-Model type: ${body.model}
-${body.model.includes('text-to-image') ?
-  '- This is a text-to-image model, focus on optimizing scene descriptions, styles, compositions, etc.' :
-  '- This is an image editing model, focus on optimizing the clarity and specificity of editing instructions'
-}
+Model: ${body.model}
+${body.model.includes('text-to-image') ? 'Focus: scene, style, composition' : 'Focus: clear editing instructions'}
 
-IMPORTANT: You must output the optimized prompt in English only. Do not add any explanations or additional text.`
+Output: Optimized English prompt only, no explanations.`
 
     const userPrompt = `Please optimize the following prompt (translate to English if needed and optimize):
 
@@ -81,8 +77,7 @@ ${body.prompt.trim()}`
       userPrompt,
       systemPrompt,
       {
-        temperature: 0.7,
-        max_tokens: 500
+        temperature: 0.7
       }
     )
 
