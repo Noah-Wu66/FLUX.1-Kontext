@@ -114,7 +114,7 @@ export function ModelSelector({
 
   // 解锁状态管理 - 从本地存储初始化
   const [unlockedModels, setUnlockedModels] = useState<Set<FluxModel>>(new Set())
-  const [lockClickCounts, setLockClickCounts] = useState<Record<FluxModel, number>>({})
+  const [lockClickCounts, setLockClickCounts] = useState<Record<FluxModel, number>>({} as Record<FluxModel, number>)
   const [shakingLocks, setShakingLocks] = useState<Set<FluxModel>>(new Set())
 
   // 组件挂载时加载解锁状态
@@ -140,7 +140,7 @@ export function ModelSelector({
     if (titlePressStart && Date.now() - titlePressStart >= 10000) {
       // 长按10秒，重置解锁状态
       setUnlockedModels(new Set())
-      setLockClickCounts({})
+      setLockClickCounts({} as Record<FluxModel, number>)
       clearUnlockStatus()
       console.log('已重置所有模型解锁状态')
     }
@@ -196,7 +196,7 @@ export function ModelSelector({
 
     // 移动端触摸振动反馈（如果支持）
     if (typeof window !== 'undefined' && 'vibrate' in navigator) {
-      navigator.vibrate(50) // 50ms 轻微振动
+      (navigator as any).vibrate(50) // 50ms 轻微振动
     }
 
     setLockClickCounts(prev => ({
@@ -218,7 +218,7 @@ export function ModelSelector({
     if (newCount >= 5) {
       // 解锁成功时的强烈振动反馈
       if (typeof window !== 'undefined' && 'vibrate' in navigator) {
-        navigator.vibrate([100, 50, 100]) // 解锁成功的振动模式
+        (navigator as any).vibrate([100, 50, 100]) // 解锁成功的振动模式
       }
 
       const newUnlockedModels = new Set([...unlockedModels, model])
