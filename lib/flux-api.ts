@@ -56,9 +56,8 @@ export class FluxAPI {
 
       if (request.model === 'kontext-dev') {
         // FLUX.1 Kontext [dev] 模型 - 使用 resolution_mode 而不是 aspect_ratio
-        // 将 aspectRatio 映射到 resolution_mode，如果用户设置了 resolutionMode 则优先使用
-        const finalResolutionMode = request.resolutionMode ||
-          (request.aspectRatio === 'auto' ? 'auto' : request.aspectRatio)
+        // 优先使用 resolutionMode，如果没有设置则使用 aspectRatio，默认为 'auto'
+        const finalResolutionMode = request.resolutionMode || request.aspectRatio || 'auto'
 
         input = {
           prompt: request.prompt,
@@ -131,9 +130,8 @@ export class FluxAPI {
 
       if (request.model === 'kontext-dev') {
         // FLUX.1 Kontext [dev] 模型 - 使用 resolution_mode 而不是 aspect_ratio
-        // 将 aspectRatio 映射到 resolution_mode，如果用户设置了 resolutionMode 则优先使用
-        const finalResolutionMode = request.resolutionMode ||
-          (request.aspectRatio === 'auto' ? 'auto' : request.aspectRatio)
+        // 优先使用 resolutionMode，如果没有设置则使用 aspectRatio，默认为 'auto'
+        const finalResolutionMode = request.resolutionMode || request.aspectRatio || 'auto'
 
         input = {
           prompt: request.prompt,
