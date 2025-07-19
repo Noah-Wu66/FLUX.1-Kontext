@@ -580,12 +580,10 @@ export function ModelSelector({
                             </button>
                           )}
 
-                          {/* 解锁成功的小锁（带解锁动画） */}
+                          {/* 解锁成功的小锁 */}
                           {model.locked && unlockedModels.has(model.value) && (
-                            <div className="ml-2 p-3 pc:p-2 flex-shrink-0 min-h-[48px] min-w-[48px] pc:min-h-[auto] pc:min-w-[auto] flex items-center justify-center bg-gradient-to-r from-green-100 via-emerald-100 to-teal-100 rounded-full border-2 border-green-300 shadow-lg shadow-green-200 animate-pulse">
+                            <div className="ml-2 p-3 pc:p-2 flex-shrink-0 min-h-[48px] min-w-[48px] pc:min-h-[auto] pc:min-w-[auto] flex items-center justify-center bg-gradient-to-r from-green-100 via-emerald-100 to-teal-100 rounded-full border-2 border-green-300 shadow-lg shadow-green-200">
                               <Lock className="w-5 h-5 pc:w-4 pc:h-4 text-green-600" />
-                              {/* 添加闪烁效果 */}
-                              <div className="absolute inset-0 rounded-full bg-gradient-to-r from-green-200 to-emerald-200 opacity-50 animate-ping"></div>
                             </div>
                           )}
                         </div>
