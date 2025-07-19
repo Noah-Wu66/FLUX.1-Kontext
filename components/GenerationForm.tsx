@@ -10,7 +10,7 @@ import { Card } from './ui/Card'
 import { ImageUpload } from './ImageUpload'
 import { MultiImageUpload } from './MultiImageUpload'
 import { PresetSelector } from './PresetSelector'
-import type { GenerationRequest, AspectRatio, OutputFormat, SafetyTolerance, FluxModel } from '@/lib/types'
+import type { GenerationRequest, AspectRatio, OutputFormat, SafetyTolerance, FluxModel, AccelerationType, ResolutionMode } from '@/lib/types'
 import { generateRandomSeed, getAspectRatioInfo, getImageDimensions, detectAspectRatio, formatAspectRatioText } from '@/lib/utils'
 
 interface GenerationFormProps {
@@ -44,6 +44,29 @@ const safetyToleranceOptions = [
   { value: '5', label: '最宽松 (5)' }
 ]
 
+// FLUX.1 Kontext [dev] 专用选项
+const accelerationOptions = [
+  { value: 'none', label: '标准速度' },
+  { value: 'regular', label: '常规加速' },
+  { value: 'high', label: '高速加速' }
+]
+
+const resolutionModeOptions = [
+  { value: 'auto', label: '自动选择（推荐）' },
+  { value: 'match_input', label: '匹配输入图片' },
+  { value: '1:1', label: '正方形 (1:1)' },
+  { value: '16:9', label: '宽屏 (16:9)' },
+  { value: '9:16', label: '手机竖屏 (9:16)' },
+  { value: '4:3', label: '标准 (4:3)' },
+  { value: '3:4', label: '竖版 (3:4)' },
+  { value: '21:9', label: '超宽屏 (21:9)' },
+  { value: '9:21', label: '超长竖屏 (9:21)' },
+  { value: '3:2', label: '经典 (3:2)' },
+  { value: '2:3', label: '竖版 (2:3)' },
+  { value: '4:5', label: '竖版 (4:5)' },
+  { value: '5:4', label: '横版 (5:4)' }
+]
+
 
 
 // 本地存储键名
@@ -52,14 +75,19 @@ const STORAGE_KEY = 'flux-kontext-settings'
 // 默认设置
 const DEFAULT_SETTINGS = {
   aspectRatio: 'auto' as AspectRatio,
-  guidanceScale: 3.5,
+  guidanceScale: 2.5, // FLUX.1 Kontext [dev] 默认值
   numImages: 1,
-  outputFormat: 'png' as OutputFormat,
+  outputFormat: 'png' as OutputFormat, // 改为PNG默认
   safetyTolerance: '5' as SafetyTolerance,
-  model: 'pro' as FluxModel,
+  model: 'kontext-dev' as FluxModel, // 设置新模型为默认
   showAdvanced: false,
   usePreset: false,
-  enableOptimization: true
+  enableOptimization: true,
+  // FLUX.1 Kontext [dev] 专用默认设置
+  numInferenceSteps: 28,
+  enableSafetyChecker: false, // 默认关闭安全检查器
+  acceleration: 'none' as const, // 默认关闭生成加速
+  resolutionMode: 'auto' as const // 默认自动分辨率模式
 }
 
 // 从本地存储加载设置
@@ -105,6 +133,12 @@ export function GenerationForm({ onGenerate, loading = false, defaultPrompt = ''
   const [seed, setSeed] = useState<number | undefined>(undefined)
   const [showAdvanced, setShowAdvanced] = useState(initialSettings.showAdvanced)
 
+  // FLUX.1 Kontext [dev] 专用参数状态
+  const [numInferenceSteps, setNumInferenceSteps] = useState(initialSettings.numInferenceSteps)
+  const [enableSafetyChecker, setEnableSafetyChecker] = useState(initialSettings.enableSafetyChecker)
+  const [acceleration, setAcceleration] = useState(initialSettings.acceleration)
+  const [resolutionMode, setResolutionMode] = useState(initialSettings.resolutionMode)
+
   // 预设系统状态
   const [usePreset, setUsePreset] = useState(initialSettings.usePreset) // 从本地存储加载
   const [selectedPreset, setSelectedPreset] = useState<string>('')
@@ -134,18 +168,26 @@ export function GenerationForm({ onGenerate, loading = false, defaultPrompt = ''
       model,
       showAdvanced,
       usePreset,
-      enableOptimization
+      enableOptimization,
+      numInferenceSteps,
+      enableSafetyChecker,
+      acceleration,
+      resolutionMode
     })
-  }, [aspectRatio, guidanceScale, numImages, outputFormat, safetyTolerance, model, showAdvanced, usePreset, enableOptimization])
+  }, [aspectRatio, guidanceScale, numImages, outputFormat, safetyTolerance, model, showAdvanced, usePreset, enableOptimization, numInferenceSteps, enableSafetyChecker, acceleration, resolutionMode])
 
 
   // 根据模型类型动态生成比例选项
   const aspectRatioOptions = useMemo(() => {
     const isTextToImageModel = model === 'max-text-to-image' || model === 'pro-text-to-image'
+    const isKontextDevModel = model === 'kontext-dev'
 
     if (isTextToImageModel) {
       // 文生图模型不显示"自动"选项
       return baseAspectRatioOptions
+    } else if (isKontextDevModel) {
+      // FLUX.1 Kontext [dev] 使用 resolution_mode，显示"自动"选项
+      return [{ value: 'auto', label: '自动（推荐）' }, ...baseAspectRatioOptions]
     } else {
       // 其他模型显示"自动"选项
       return [{ value: 'auto', label: '自动' }, ...baseAspectRatioOptions]
@@ -178,6 +220,13 @@ export function GenerationForm({ onGenerate, loading = false, defaultPrompt = ''
 
     if (numImages < 1 || numImages > 4) {
       newErrors.numImages = '图片数量必须在 1-4 之间'
+    }
+
+    // FLUX.1 Kontext [dev] 专用验证
+    if (model === 'kontext-dev') {
+      if (numInferenceSteps < 1 || numInferenceSteps > 50) {
+        newErrors.numInferenceSteps = '推理步数必须在 1-50 之间'
+      }
     }
 
     setErrors(newErrors)
@@ -499,7 +548,14 @@ export function GenerationForm({ onGenerate, loading = false, defaultPrompt = ''
       ...(seed && { seed }),
       usePreset,
       ...(usePreset && selectedPreset && { presetName: selectedPreset }),
-      ...(usePreset && subject.trim() && { subject: subject.trim() })
+      ...(usePreset && subject.trim() && { subject: subject.trim() }),
+      // FLUX.1 Kontext [dev] 专用参数
+      ...(model === 'kontext-dev' && {
+        numInferenceSteps,
+        enableSafetyChecker,
+        acceleration,
+        resolutionMode
+      })
     }
 
     onGenerate(request)
@@ -790,21 +846,31 @@ export function GenerationForm({ onGenerate, loading = false, defaultPrompt = ''
               {!(model === 'max-text-to-image' || model === 'pro-text-to-image') && (
                 <div className="space-y-4 pc:space-y-0 pc:grid pc:grid-cols-2 pc:gap-6">
                   <div>
-                    <Select
-                      label="图片比例"
-                      options={aspectRatioOptions}
-                      value={aspectRatio}
-                      onChange={(e) => handleAspectRatioChange(e.target.value as AspectRatio)}
-                      helperText={
-                        aspectRatio === 'auto'
-                          ? (model === 'max-multi' ? imageUrls.length > 0 : imageUrl)
-                            ? detectedRatio
-                              ? `自动检测: ${getAspectRatioInfo(detectedRatio).label}`
-                              : '等待检测图片比例'
-                            : '默认使用正方形 (1:1)'
-                          : `${aspectRatioInfo.width} × ${aspectRatioInfo.height} 像素`
-                      }
-                    />
+                    {model === 'kontext-dev' ? (
+                      <Select
+                        label="分辨率模式"
+                        options={resolutionModeOptions}
+                        value={resolutionMode}
+                        onChange={(e) => setResolutionMode(e.target.value as any)}
+                        helperText="控制输出图片的分辨率，自动模式让AI选择最佳分辨率"
+                      />
+                    ) : (
+                      <Select
+                        label="图片比例"
+                        options={aspectRatioOptions}
+                        value={aspectRatio}
+                        onChange={(e) => handleAspectRatioChange(e.target.value as AspectRatio)}
+                        helperText={
+                          aspectRatio === 'auto'
+                            ? (model === 'max-multi' ? imageUrls.length > 0 : imageUrl)
+                              ? detectedRatio
+                                ? `自动检测: ${getAspectRatioInfo(detectedRatio).label}`
+                                : '等待检测图片比例'
+                              : '默认使用正方形 (1:1)'
+                            : `${aspectRatioInfo.width} × ${aspectRatioInfo.height} 像素`
+                        }
+                      />
+                    )}
                   </div>
 
                   <div>
@@ -849,15 +915,17 @@ export function GenerationForm({ onGenerate, loading = false, defaultPrompt = ''
               </div>
 
               <div className="space-y-4 pc:space-y-0 pc:grid pc:grid-cols-2 pc:gap-6">
-                <div>
-                  <Select
-                    label="安全等级"
-                    options={safetyToleranceOptions}
-                    value={safetyTolerance}
-                    onChange={(e) => setSafetyTolerance(e.target.value as SafetyTolerance)}
-                    helperText="控制内容安全检查的严格程度"
-                  />
-                </div>
+                {model !== 'kontext-dev' && (
+                  <div>
+                    <Select
+                      label="安全等级"
+                      options={safetyToleranceOptions}
+                      value={safetyTolerance}
+                      onChange={(e) => setSafetyTolerance(e.target.value as SafetyTolerance)}
+                      helperText="控制内容安全检查的严格程度"
+                    />
+                  </div>
+                )}
 
                 <div>
                   <label className="block text-sm pc:text-base font-medium text-gray-700 mb-2">
@@ -884,6 +952,57 @@ export function GenerationForm({ onGenerate, loading = false, defaultPrompt = ''
                   </div>
                 </div>
               </div>
+
+              {/* FLUX.1 Kontext [dev] 专用参数 */}
+              {model === 'kontext-dev' && (
+                <div className="space-y-4 pc:space-y-6 border-t border-gray-200 pt-4 pc:pt-6">
+                  <h4 className="text-sm pc:text-base font-medium text-gray-900">
+                    FLUX.1 Kontext [dev] 专用设置
+                  </h4>
+
+                  <div className="space-y-4 pc:space-y-0 pc:grid pc:grid-cols-2 pc:gap-6">
+                    <div>
+                      <Input
+                        label="推理步数"
+                        type="number"
+                        min="1"
+                        max="50"
+                        value={numInferenceSteps}
+                        onChange={(e) => setNumInferenceSteps(parseInt(e.target.value))}
+                        error={errors.numInferenceSteps}
+                        helperText="推理步数，默认28步，更多步数质量更高但速度更慢"
+                      />
+                    </div>
+
+                    <div>
+                      <Select
+                        label="生成加速"
+                        options={accelerationOptions}
+                        value={acceleration}
+                        onChange={(e) => setAcceleration(e.target.value as any)}
+                        helperText="选择生成速度，加速可能略微影响质量"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-4 pc:space-y-0 pc:grid pc:grid-cols-2 pc:gap-6">
+                    <div>
+                      <label className="flex items-center space-x-2 text-sm pc:text-base">
+                        <input
+                          type="checkbox"
+                          checked={enableSafetyChecker}
+                          onChange={(e) => setEnableSafetyChecker(e.target.checked)}
+                          className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                        />
+                        <span className="text-gray-700">启用安全检查器</span>
+                      </label>
+                      <p className="text-xs pc:text-sm text-gray-500 mt-1">
+                        检查生成内容是否包含不当内容
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </div>

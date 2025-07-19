@@ -84,8 +84,8 @@ export default function HomePage() {
             <h2 className="text-2xl pc:text-3xl lg:text-4xl font-bold text-gray-900">AI 图片生成</h2>
           </div>
           <p className="text-base pc:text-lg text-gray-600 max-w-2xl mx-auto px-4">
-            基于 FLUX.1 Kontext 模型，为您提供高质量的 AI 图片生成服务。
-            支持文本到图片、图片编辑等多种功能。
+            基于最新的 FLUX.1 Kontext [dev] 模型，为您提供前沿的 AI 图片编辑服务。
+            深度理解图片上下文，让编辑更精准、更智能。
           </p>
         </div>
 

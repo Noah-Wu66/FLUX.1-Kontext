@@ -2,6 +2,7 @@ import { fal } from '@fal-ai/client'
 import type {
   FluxKontextInput,
   FluxKontextMultiInput,
+  FluxKontextDevInput,
   FluxKontextOutput,
   GenerationRequest,
   GenerationResult,
@@ -23,7 +24,8 @@ const FLUX_MODELS = {
   pro: 'fal-ai/flux-pro/kontext',
   'max-multi': 'fal-ai/flux-pro/kontext/max/multi',
   'max-text-to-image': 'fal-ai/flux-pro/kontext/max/text-to-image',
-  'pro-text-to-image': 'fal-ai/flux-pro/kontext/text-to-image'
+  'pro-text-to-image': 'fal-ai/flux-pro/kontext/text-to-image',
+  'kontext-dev': 'fal-ai/flux-kontext/dev'
 } as const
 
 const getModelEndpoint = (model: FluxModel): string => {
@@ -50,9 +52,27 @@ export class FluxAPI {
       const modelEndpoint = getModelEndpoint(request.model)
 
       // 根据模型类型构建不同的输入
-      let input: FluxKontextInput | FluxKontextMultiInput
+      let input: FluxKontextInput | FluxKontextMultiInput | FluxKontextDevInput
 
-      if (request.model === 'max-multi') {
+      if (request.model === 'kontext-dev') {
+        // FLUX.1 Kontext [dev] 模型 - 使用 resolution_mode 而不是 aspect_ratio
+        // 将 aspectRatio 映射到 resolution_mode，如果用户设置了 resolutionMode 则优先使用
+        const finalResolutionMode = request.resolutionMode ||
+          (request.aspectRatio === 'auto' ? 'auto' : request.aspectRatio)
+
+        input = {
+          prompt: request.prompt,
+          ...(request.imageUrl && { image_url: request.imageUrl }),
+          ...(request.numInferenceSteps && { num_inference_steps: request.numInferenceSteps }),
+          ...(request.seed && { seed: request.seed }),
+          guidance_scale: request.guidanceScale,
+          ...(request.numImages && { num_images: request.numImages }),
+          ...(request.enableSafetyChecker !== undefined && { enable_safety_checker: request.enableSafetyChecker }),
+          output_format: request.outputFormat,
+          ...(request.acceleration && { acceleration: request.acceleration }),
+          resolution_mode: finalResolutionMode
+        } as FluxKontextDevInput
+      } else if (request.model === 'max-multi') {
         // 多图片模型
         input = {
           prompt: request.prompt,
@@ -107,9 +127,27 @@ export class FluxAPI {
       const modelEndpoint = getModelEndpoint(request.model)
 
       // 根据模型类型构建不同的输入
-      let input: FluxKontextInput | FluxKontextMultiInput
+      let input: FluxKontextInput | FluxKontextMultiInput | FluxKontextDevInput
 
-      if (request.model === 'max-multi') {
+      if (request.model === 'kontext-dev') {
+        // FLUX.1 Kontext [dev] 模型 - 使用 resolution_mode 而不是 aspect_ratio
+        // 将 aspectRatio 映射到 resolution_mode，如果用户设置了 resolutionMode 则优先使用
+        const finalResolutionMode = request.resolutionMode ||
+          (request.aspectRatio === 'auto' ? 'auto' : request.aspectRatio)
+
+        input = {
+          prompt: request.prompt,
+          ...(request.imageUrl && { image_url: request.imageUrl }),
+          ...(request.numInferenceSteps && { num_inference_steps: request.numInferenceSteps }),
+          ...(request.seed && { seed: request.seed }),
+          guidance_scale: request.guidanceScale,
+          ...(request.numImages && { num_images: request.numImages }),
+          ...(request.enableSafetyChecker !== undefined && { enable_safety_checker: request.enableSafetyChecker }),
+          output_format: request.outputFormat,
+          ...(request.acceleration && { acceleration: request.acceleration }),
+          resolution_mode: finalResolutionMode
+        } as FluxKontextDevInput
+      } else if (request.model === 'max-multi') {
         // 多图片模型
         input = {
           prompt: request.prompt,

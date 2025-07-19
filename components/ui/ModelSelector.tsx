@@ -51,6 +51,11 @@ const modelCategories: ModelCategory[] = [
     description: '基于参考图片进行编辑和变换',
     models: [
       {
+        value: 'kontext-dev',
+        name: 'FLUX.1 Kontext [dev]',
+        description: '前沿图片编辑模型，理解图片上下文，编辑更精准（推荐）'
+      },
+      {
         value: 'pro',
         name: 'FLUX.1 Kontext Pro',
         description: '专业图片编辑模型'

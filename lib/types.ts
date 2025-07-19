@@ -6,7 +6,12 @@ export type OutputFormat = 'jpeg' | 'png'
 
 export type SafetyTolerance = '1' | '2' | '3' | '4' | '5'
 
-export type FluxModel = 'max' | 'pro' | 'max-multi' | 'max-text-to-image' | 'pro-text-to-image'
+// FLUX.1 Kontext [dev] 专用类型
+export type AccelerationType = 'none' | 'regular' | 'high'
+
+export type ResolutionMode = 'auto' | 'match_input' | '1:1' | '16:9' | '21:9' | '3:2' | '2:3' | '4:5' | '5:4' | '3:4' | '4:3' | '9:16' | '9:21'
+
+export type FluxModel = 'max' | 'pro' | 'max-multi' | 'max-text-to-image' | 'pro-text-to-image' | 'kontext-dev'
 
 export interface FluxKontextInput {
   prompt: string
@@ -30,6 +35,21 @@ export interface FluxKontextMultiInput {
   safety_tolerance?: SafetyTolerance
   aspect_ratio?: AspectRatio
   image_urls?: string[] // 多图片输入
+}
+
+// FLUX.1 Kontext [dev] 专用输入接口
+export interface FluxKontextDevInput {
+  prompt: string
+  image_url?: string
+  num_inference_steps?: number
+  seed?: number
+  guidance_scale?: number
+  sync_mode?: boolean
+  num_images?: number
+  enable_safety_checker?: boolean
+  output_format?: OutputFormat
+  acceleration?: AccelerationType
+  resolution_mode?: ResolutionMode
 }
 
 export interface GeneratedImage {
@@ -61,6 +81,11 @@ export interface GenerationRequest {
   usePreset?: boolean // 是否使用预设模式
   presetName?: string // 预设名称
   subject?: string // 预设中的主体（用于 Zoom 等预设）
+  // FLUX.1 Kontext [dev] 专用参数
+  numInferenceSteps?: number
+  enableSafetyChecker?: boolean
+  acceleration?: AccelerationType
+  resolutionMode?: ResolutionMode
 }
 
 export interface GenerationResult {
