@@ -437,6 +437,39 @@
     animation: celebrate 0.6s ease-in-out;
   }
 
+  /* 锁松动动画 */
+  @keyframes lockLoosen {
+    0%, 100% { transform: rotate(0deg) scale(1); }
+    10% { transform: rotate(-2deg) scale(1.02); }
+    20% { transform: rotate(2deg) scale(1.04); }
+    30% { transform: rotate(-1deg) scale(1.02); }
+    40% { transform: rotate(1deg) scale(1.01); }
+    50% { transform: rotate(-0.5deg) scale(1); }
+    60% { transform: rotate(0.5deg) scale(1.01); }
+    70% { transform: rotate(-0.2deg) scale(1); }
+    80% { transform: rotate(0.2deg) scale(1); }
+    90% { transform: rotate(0deg) scale(1); }
+  }
+
+  .animate-loosen {
+    animation: lockLoosen 0.5s ease-in-out;
+  }
+
+  /* 锁摇摆动画（更强烈的松动效果） */
+  @keyframes lockWobble {
+    0%, 100% { transform: rotate(0deg) translateX(0px); }
+    15% { transform: rotate(-3deg) translateX(-2px); }
+    30% { transform: rotate(3deg) translateX(2px); }
+    45% { transform: rotate(-2deg) translateX(-1px); }
+    60% { transform: rotate(2deg) translateX(1px); }
+    75% { transform: rotate(-1deg) translateX(-0.5px); }
+    90% { transform: rotate(0.5deg) translateX(0.5px); }
+  }
+
+  .animate-wobble {
+    animation: lockWobble 0.8s ease-in-out;
+  }
+
   /* 移动端小锁按钮优化 */
   @media (max-width: 767px) {
     .lock-button {
