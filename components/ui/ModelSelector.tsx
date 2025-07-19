@@ -116,6 +116,7 @@ export function ModelSelector({
   const [unlockedModels, setUnlockedModels] = useState<Set<FluxModel>>(new Set())
   const [lockClickCounts, setLockClickCounts] = useState<Record<FluxModel, number>>({} as Record<FluxModel, number>)
   const [shakingLocks, setShakingLocks] = useState<Set<FluxModel>>(new Set())
+  const [celebratingModels, setCelebratingModels] = useState<Set<FluxModel>>(new Set())
 
   // 组件挂载时加载解锁状态
   useEffect(() => {
@@ -228,6 +229,22 @@ export function ModelSelector({
       const newUnlockedModels = new Set(unlockedModels)
       newUnlockedModels.add(model)
       setUnlockedModels(newUnlockedModels)
+
+      // 添加庆祝动画
+      setCelebratingModels(prev => {
+        const newSet = new Set(prev)
+        newSet.add(model)
+        return newSet
+      })
+
+      // 3秒后移除庆祝动画
+      setTimeout(() => {
+        setCelebratingModels(prev => {
+          const newSet = new Set(prev)
+          newSet.delete(model)
+          return newSet
+        })
+      }, 3000)
 
       // 保存到本地存储
       const unlockedArray: FluxModel[] = []
@@ -400,18 +417,21 @@ export function ModelSelector({
                       const isLocked = model.locked && !unlockedModels.has(model.value)
                       const isUnlocking = model.locked && unlockedModels.has(model.value)
                       const isShaking = shakingLocks.has(model.value)
+                      const isCelebrating = celebratingModels.has(model.value)
                       const clickCount = lockClickCounts[model.value] || 0
 
                       return (
                         <div
                           key={model.value}
                           className={cn(
-                            'w-full p-4 pc:p-3 border rounded-lg transition-all duration-200 min-h-[60px] pc:min-h-[auto] flex items-center justify-between touch-feedback relative',
+                            'w-full p-4 pc:p-3 border rounded-lg transition-all duration-300 min-h-[60px] pc:min-h-[auto] flex items-center justify-between touch-feedback relative',
                             value === model.value
                               ? 'border-primary-500 bg-primary-50 ring-2 ring-primary-200'
                               : isLocked
                               ? 'border-gray-200 bg-gray-50 cursor-not-allowed opacity-75'
-                              : 'border-gray-200 hover:border-primary-300 hover:bg-primary-50 active:bg-primary-100 cursor-pointer'
+                              : 'border-gray-200 hover:border-primary-300 hover:bg-primary-50 active:bg-primary-100 cursor-pointer',
+                            // 庆祝动画效果
+                            isCelebrating && 'animate-celebrate rainbow-border bg-gradient-to-r from-green-50 via-blue-50 to-purple-50'
                           )}
                           onClick={() => !isLocked && handleModelSelect(model.value)}
                         >
@@ -419,8 +439,8 @@ export function ModelSelector({
                             <div className="font-medium text-gray-900 text-base pc:text-sm flex items-center gap-2">
                               {model.name}
                               {isUnlocking && (
-                                <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full animate-pulse">
-                                  已解锁
+                                <span className="text-xs bg-gradient-to-r from-green-100 to-emerald-100 text-green-700 px-3 py-1 rounded-full animate-pulse border border-green-200 shadow-sm">
+                                  ✨ 已解锁 ✨
                                 </span>
                               )}
                             </div>
@@ -429,8 +449,21 @@ export function ModelSelector({
                               <div className="text-xs text-primary-600 mt-1 font-medium">✓ 当前选中</div>
                             )}
                             {isLocked && clickCount > 0 && (
-                              <div className="unlock-hint text-xs pc:text-xs text-orange-600 mt-1 font-medium bg-orange-50 px-2 py-1 rounded-md inline-block">
-                                🔒 还需点击 {5 - clickCount} 次解锁
+                              <div className={cn(
+                                "unlock-hint text-xs pc:text-xs mt-1 font-medium px-2 py-1 rounded-md inline-block transition-all duration-300",
+                                // 根据点击次数改变提示颜色
+                                clickCount === 1 && "text-blue-700 bg-gradient-to-r from-blue-50 to-cyan-50",
+                                clickCount === 2 && "text-green-700 bg-gradient-to-r from-green-50 to-emerald-50",
+                                clickCount === 3 && "text-yellow-700 bg-gradient-to-r from-yellow-50 to-orange-50",
+                                clickCount === 4 && "text-red-700 bg-gradient-to-r from-red-50 to-pink-50 animate-pulse"
+                              )}>
+                                {/* 根据点击次数显示不同的emoji */}
+                                {clickCount === 1 && "🔵"}
+                                {clickCount === 2 && "🟢"}
+                                {clickCount === 3 && "🟡"}
+                                {clickCount === 4 && "🔴"}
+                                还需点击 {5 - clickCount} 次解锁
+                                {clickCount === 4 && " 🎉"}
                               </div>
                             )}
                           </div>
@@ -440,24 +473,42 @@ export function ModelSelector({
                             <button
                               onClick={(e) => handleLockClick(model.value, e)}
                               className={cn(
-                                'lock-button ml-2 p-3 pc:p-2 rounded-full transition-all duration-200 flex-shrink-0',
-                                'hover:bg-gray-200 active:bg-gray-300 touch-feedback',
+                                'lock-button ml-2 p-3 pc:p-2 rounded-full transition-all duration-300 flex-shrink-0',
+                                'hover:bg-gradient-to-r hover:from-purple-100 hover:to-pink-100 hover:shadow-lg hover:scale-105',
+                                'active:bg-gradient-to-r active:from-purple-200 active:to-pink-200 active:scale-95',
+                                'touch-feedback border-2 border-transparent',
                                 'min-h-[48px] min-w-[48px] pc:min-h-[auto] pc:min-w-[auto]',
                                 'flex items-center justify-center',
-                                'focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2',
-                                isShaking && 'animate-shake'
+                                'focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2',
+                                isShaking && 'animate-shake',
+                                // 根据点击次数改变背景色和边框
+                                clickCount === 0 && 'bg-gray-50 hover:border-gray-200',
+                                clickCount === 1 && 'bg-gradient-to-r from-blue-50 to-cyan-50 border-blue-200 shadow-blue-100 shadow-md',
+                                clickCount === 2 && 'bg-gradient-to-r from-green-50 to-emerald-50 border-green-200 shadow-green-100 shadow-md',
+                                clickCount === 3 && 'bg-gradient-to-r from-yellow-50 to-orange-50 border-yellow-200 shadow-yellow-100 shadow-md',
+                                clickCount === 4 && 'bg-gradient-to-r from-red-50 to-pink-50 border-red-200 shadow-red-100 shadow-lg colorful-lock-hover'
                               )}
                               title={`点击 ${5 - clickCount} 次解锁`}
                               aria-label={`解锁 ${model.name} 模型，还需点击 ${5 - clickCount} 次`}
                             >
-                              <Lock className="w-5 h-5 pc:w-4 pc:h-4 text-gray-400" />
+                              <Lock className={cn(
+                                'w-5 h-5 pc:w-4 pc:h-4 transition-colors duration-200',
+                                // 根据点击次数改变锁的颜色
+                                clickCount === 0 && 'text-gray-400',
+                                clickCount === 1 && 'text-blue-500',
+                                clickCount === 2 && 'text-green-500',
+                                clickCount === 3 && 'text-yellow-500',
+                                clickCount === 4 && 'text-red-500'
+                              )} />
                             </button>
                           )}
 
                           {/* 解锁成功的小锁（带解锁动画） */}
                           {model.locked && unlockedModels.has(model.value) && (
-                            <div className="ml-2 p-3 pc:p-2 flex-shrink-0 min-h-[48px] min-w-[48px] pc:min-h-[auto] pc:min-w-[auto] flex items-center justify-center">
-                              <Lock className="w-5 h-5 pc:w-4 pc:h-4 text-green-500 animate-unlock" />
+                            <div className="ml-2 p-3 pc:p-2 flex-shrink-0 min-h-[48px] min-w-[48px] pc:min-h-[auto] pc:min-w-[auto] flex items-center justify-center bg-gradient-to-r from-green-100 via-emerald-100 to-teal-100 rounded-full border-2 border-green-300 shadow-lg shadow-green-200 animate-pulse">
+                              <Lock className="w-5 h-5 pc:w-4 pc:h-4 text-green-600" />
+                              {/* 添加闪烁效果 */}
+                              <div className="absolute inset-0 rounded-full bg-gradient-to-r from-green-200 to-emerald-200 opacity-50 animate-ping"></div>
                             </div>
                           )}
                         </div>
