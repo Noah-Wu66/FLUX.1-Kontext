@@ -9,13 +9,13 @@ import { ArrowLeft, Sparkles, Zap, Target, Brain } from 'lucide-react'
 import Link from 'next/link'
 import type { GenerationRequest, GeneratedImage } from '@/lib/types'
 import { saveGenerationResult, scrollToResultOnMobile } from '@/lib/utils'
-import { useToast } from '@/hooks/useToast'
+import { useToast } from '@/components/ui/Toast'
 
 export default function KontextDevPage() {
   const [images, setImages] = useState<GeneratedImage[]>([])
   const [loading, setLoading] = useState(false)
   const [currentSeed, setCurrentSeed] = useState<number | undefined>(undefined)
-  const { success, error: showError } = useToast()
+  const { success, error: showError, ToastContainer } = useToast()
 
   const handleGenerate = async (request: GenerationRequest) => {
     setLoading(true)
@@ -153,6 +153,9 @@ export default function KontextDevPage() {
           </div>
         </div>
       </div>
+
+      {/* Toast 通知容器 */}
+      <ToastContainer />
     </div>
   )
 }
