@@ -45,17 +45,17 @@ export function MainMenu({ className, onMenuItemSelect }: MainMenuProps) {
       children: [
         {
           id: 'flux-pro-text-to-image',
-          label: 'FLUX.1 Kontext Pro Text-to-Image',
+          label: 'FLUX.1 Pro',
           icon: <Zap className="w-4 h-4" />,
           href: '/generate/pro-text-to-image',
-          onClick: () => console.log('Navigate to FLUX.1 Kontext Pro Text-to-Image')
+          onClick: () => console.log('Navigate to FLUX.1 Pro')
         },
         {
           id: 'flux-max-text-to-image',
-          label: 'FLUX.1 Kontext Max Text-to-Image',
+          label: 'FLUX.1 Max',
           icon: <Sparkles className="w-4 h-4" />,
           href: '/generate/max-text-to-image',
-          onClick: () => console.log('Navigate to FLUX.1 Kontext Max Text-to-Image')
+          onClick: () => console.log('Navigate to FLUX.1 Max')
         }
       ]
     },
@@ -65,25 +65,32 @@ export function MainMenu({ className, onMenuItemSelect }: MainMenuProps) {
       icon: <Edit3 className="w-4 h-4" />,
       children: [
         {
+          id: 'flux-kontext-dev',
+          label: 'Kontext Dev',
+          icon: <PenTool className="w-4 h-4" />,
+          href: '/edit/kontext-dev',
+          onClick: () => console.log('Navigate to Kontext Dev')
+        },
+        {
           id: 'flux-pro',
-          label: 'FLUX.1 Kontext Pro',
+          label: 'Kontext Pro',
           icon: <PenTool className="w-4 h-4" />,
           href: '/edit/pro',
-          onClick: () => console.log('Navigate to FLUX.1 Kontext Pro')
+          onClick: () => console.log('Navigate to Kontext Pro')
         },
         {
           id: 'flux-max',
-          label: 'FLUX.1 Kontext Max',
+          label: 'Kontext Max',
           icon: <Image className="w-4 h-4" />,
           href: '/edit/max',
-          onClick: () => console.log('Navigate to FLUX.1 Kontext Max')
+          onClick: () => console.log('Navigate to Kontext Max')
         },
         {
           id: 'flux-max-multi',
-          label: 'FLUX.1 Kontext Max Multi',
+          label: 'Kontext Multi',
           icon: <Layers className="w-4 h-4" />,
           href: '/edit/max-multi',
-          onClick: () => console.log('Navigate to FLUX.1 Kontext Max Multi')
+          onClick: () => console.log('Navigate to Kontext Multi')
         }
       ]
     }

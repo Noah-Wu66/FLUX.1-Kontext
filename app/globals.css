@@ -336,4 +336,49 @@
       @apply min-h-[48px] min-w-[48px];
     }
   }
+
+  /* 小锁震动动画 */
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    10%, 30%, 50%, 70%, 90% { transform: translateX(-2px); }
+    20%, 40%, 60%, 80% { transform: translateX(2px); }
+  }
+
+  .animate-shake {
+    animation: shake 0.3s ease-in-out;
+  }
+
+  /* 解锁动画 */
+  @keyframes unlock {
+    0% { transform: scale(1) rotate(0deg); opacity: 1; }
+    50% { transform: scale(1.2) rotate(10deg); opacity: 0.8; }
+    100% { transform: scale(0) rotate(20deg); opacity: 0; }
+  }
+
+  .animate-unlock {
+    animation: unlock 0.5s ease-in-out forwards;
+  }
+
+  /* 移动端小锁按钮优化 */
+  @media (max-width: 767px) {
+    .lock-button {
+      /* 确保移动端触摸目标足够大 */
+      min-height: 48px !important;
+      min-width: 48px !important;
+      /* 增强触摸反馈 */
+      transition: all 0.15s ease-in-out;
+    }
+
+    .lock-button:active {
+      transform: scale(0.95);
+      background-color: rgba(156, 163, 175, 0.3);
+    }
+
+    /* 移动端解锁提示优化 */
+    .unlock-hint {
+      font-size: 14px;
+      padding: 6px 12px;
+      border-radius: 8px;
+    }
+  }
 }

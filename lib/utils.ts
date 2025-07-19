@@ -245,3 +245,67 @@ export function clearGenerationResult(): void {
     console.error('清除生成结果失败:', error)
   }
 }
+
+// 模型解锁状态管理
+const UNLOCK_STORAGE_KEY = 'flux-kontext-unlocked-models'
+
+export interface UnlockStatus {
+  unlockedModels: string[]
+  unlockTime: number
+}
+
+/**
+ * 加载解锁状态
+ */
+export function loadUnlockStatus(): string[] {
+  if (typeof window === 'undefined') return []
+
+  try {
+    const stored = localStorage.getItem(UNLOCK_STORAGE_KEY)
+    if (stored) {
+      const unlockStatus: UnlockStatus = JSON.parse(stored)
+      return unlockStatus.unlockedModels || []
+    }
+  } catch (error) {
+    console.error('加载解锁状态失败:', error)
+  }
+  return []
+}
+
+/**
+ * 保存解锁状态
+ */
+export function saveUnlockStatus(unlockedModels: string[]): void {
+  if (typeof window === 'undefined') return
+
+  try {
+    const unlockStatus: UnlockStatus = {
+      unlockedModels,
+      unlockTime: Date.now()
+    }
+    localStorage.setItem(UNLOCK_STORAGE_KEY, JSON.stringify(unlockStatus))
+  } catch (error) {
+    console.error('保存解锁状态失败:', error)
+  }
+}
+
+/**
+ * 清除解锁状态
+ */
+export function clearUnlockStatus(): void {
+  if (typeof window === 'undefined') return
+
+  try {
+    localStorage.removeItem(UNLOCK_STORAGE_KEY)
+  } catch (error) {
+    console.error('清除解锁状态失败:', error)
+  }
+}
+
+/**
+ * 检查模型是否已解锁
+ */
+export function isModelUnlocked(model: string): boolean {
+  const unlockedModels = loadUnlockStatus()
+  return unlockedModels.includes(model)
+}
