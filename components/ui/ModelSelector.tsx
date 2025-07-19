@@ -205,7 +205,11 @@ export function ModelSelector({
     }))
 
     // 添加震动动画
-    setShakingLocks(prev => new Set([...prev, model]))
+    setShakingLocks(prev => {
+      const newSet = new Set(prev)
+      newSet.add(model)
+      return newSet
+    })
     setTimeout(() => {
       setShakingLocks(prev => {
         const newSet = new Set(prev)
@@ -221,11 +225,13 @@ export function ModelSelector({
         (navigator as any).vibrate([100, 50, 100]) // 解锁成功的振动模式
       }
 
-      const newUnlockedModels = new Set([...unlockedModels, model])
+      const newUnlockedModels = new Set(unlockedModels)
+      newUnlockedModels.add(model)
       setUnlockedModels(newUnlockedModels)
 
       // 保存到本地存储
-      const unlockedArray = Array.from(newUnlockedModels)
+      const unlockedArray: FluxModel[] = []
+      newUnlockedModels.forEach(model => unlockedArray.push(model))
       saveUnlockStatus(unlockedArray)
 
       // 开发环境下输出调试信息
