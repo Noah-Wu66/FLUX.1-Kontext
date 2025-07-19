@@ -101,8 +101,6 @@ function getModelDisplayInfo(model: FluxModel) {
 // 获取锁的松动程度描述
 function getLockLoosenessDescription(clickCount: number): { text: string; emoji: string; intensity: string } {
   switch (clickCount) {
-    case 0:
-      return { text: "锁很牢固", emoji: "🔒", intensity: "solid" }
     case 1:
       return { text: "锁开始松动", emoji: "🔓", intensity: "loose" }
     case 2:
@@ -112,7 +110,7 @@ function getLockLoosenessDescription(clickCount: number): { text: string; emoji:
     case 4:
       return { text: "锁马上就开了！", emoji: "🎯", intensity: "breaking" }
     default:
-      return { text: "锁很牢固", emoji: "🔒", intensity: "solid" }
+      return { text: "", emoji: "🔒", intensity: "solid" }
   }
 }
 
@@ -136,6 +134,7 @@ export function ModelSelector({
   const [shakingLocks, setShakingLocks] = useState<Set<FluxModel>>(new Set())
   const [celebratingModels, setCelebratingModels] = useState<Set<FluxModel>>(new Set())
   const [loosenedLocks, setLoosenedLocks] = useState<Set<FluxModel>>(new Set()) // 松动的锁
+  const [hintedModels, setHintedModels] = useState<Set<FluxModel>>(new Set()) // 显示提示的模型
 
   // 组件挂载时加载解锁状态
   useEffect(() => {
@@ -209,7 +208,7 @@ export function ModelSelector({
     setSelectedCategory(null)
   }
 
-  // 处理被锁定模型的点击（触发松动动画）
+  // 处理被锁定模型的点击（触发松动动画和提示）
   const handleLockedModelClick = (model: FluxModel) => {
     // 轻微的振动反馈
     if (typeof window !== 'undefined' && 'vibrate' in navigator) {
@@ -223,6 +222,13 @@ export function ModelSelector({
       return newSet
     })
 
+    // 显示提示
+    setHintedModels(prev => {
+      const newSet = new Set(prev)
+      newSet.add(model)
+      return newSet
+    })
+
     // 0.5秒后移除松动动画
     setTimeout(() => {
       setLoosenedLocks(prev => {
@@ -231,6 +237,15 @@ export function ModelSelector({
         return newSet
       })
     }, 500)
+
+    // 3秒后移除提示
+    setTimeout(() => {
+      setHintedModels(prev => {
+        const newSet = new Set(prev)
+        newSet.delete(model)
+        return newSet
+      })
+    }, 3000)
   }
 
   // 处理小锁点击
@@ -471,6 +486,7 @@ export function ModelSelector({
                       const isShaking = shakingLocks.has(model.value)
                       const isCelebrating = celebratingModels.has(model.value)
                       const isLoosened = loosenedLocks.has(model.value)
+                      const isHinted = hintedModels.has(model.value)
                       const clickCount = lockClickCounts[model.value] || 0
                       const lockDescription = getLockLoosenessDescription(clickCount)
 
@@ -504,42 +520,23 @@ export function ModelSelector({
                             )}
                             {isLocked && (
                               <div className="space-y-1">
-                                {/* 锁的状态描述 */}
-                                <div className={cn(
-                                  "text-xs pc:text-xs font-medium px-2 py-1 rounded-md inline-block transition-all duration-300",
-                                  lockDescription.intensity === 'solid' && "text-gray-600 bg-gray-100",
-                                  lockDescription.intensity === 'loose' && "text-blue-700 bg-gradient-to-r from-blue-50 to-cyan-50",
-                                  lockDescription.intensity === 'shaky' && "text-green-700 bg-gradient-to-r from-green-50 to-emerald-50",
-                                  lockDescription.intensity === 'critical' && "text-yellow-700 bg-gradient-to-r from-yellow-50 to-orange-50",
-                                  lockDescription.intensity === 'breaking' && "text-red-700 bg-gradient-to-r from-red-50 to-pink-50 animate-pulse"
-                                )}>
-                                  {lockDescription.emoji} {lockDescription.text}
-                                </div>
-
-                                {/* 解锁进度提示 */}
+                                {/* 只有点击锁后才显示锁的状态描述 */}
                                 {clickCount > 0 && (
                                   <div className={cn(
-                                    "text-xs pc:text-xs mt-1 font-medium px-2 py-1 rounded-md inline-block transition-all duration-300",
-                                    // 根据点击次数改变提示颜色
-                                    clickCount === 1 && "text-blue-700 bg-gradient-to-r from-blue-50 to-cyan-50",
-                                    clickCount === 2 && "text-green-700 bg-gradient-to-r from-green-50 to-emerald-50",
-                                    clickCount === 3 && "text-yellow-700 bg-gradient-to-r from-yellow-50 to-orange-50",
-                                    clickCount === 4 && "text-red-700 bg-gradient-to-r from-red-50 to-pink-50 animate-pulse"
+                                    "text-xs pc:text-xs font-medium px-2 py-1 rounded-md inline-block transition-all duration-300",
+                                    lockDescription.intensity === 'loose' && "text-blue-700 bg-gradient-to-r from-blue-50 to-cyan-50",
+                                    lockDescription.intensity === 'shaky' && "text-green-700 bg-gradient-to-r from-green-50 to-emerald-50",
+                                    lockDescription.intensity === 'critical' && "text-yellow-700 bg-gradient-to-r from-yellow-50 to-orange-50",
+                                    lockDescription.intensity === 'breaking' && "text-red-700 bg-gradient-to-r from-red-50 to-pink-50 animate-pulse"
                                   )}>
-                                    {/* 根据点击次数显示不同的emoji */}
-                                    {clickCount === 1 && "🔵"}
-                                    {clickCount === 2 && "🟢"}
-                                    {clickCount === 3 && "🟡"}
-                                    {clickCount === 4 && "🔴"}
-                                    还需点击 {5 - clickCount} 次解锁
-                                    {clickCount === 4 && " 🎉"}
+                                    {lockDescription.emoji} {lockDescription.text}
                                   </div>
                                 )}
 
-                                {/* 点击模型时的提示 */}
-                                {isLocked && clickCount === 0 && (
-                                  <div className="text-xs text-gray-500 mt-1">
-                                    💡 点击小锁解锁，或点击模型查看锁的状态
+                                {/* 点击模型时的松动提示 */}
+                                {isHinted && (
+                                  <div className="text-xs text-amber-600 mt-1 bg-amber-50 px-2 py-1 rounded-md inline-block animate-pulse">
+                                    🔒 右边的好像不太牢固...
                                   </div>
                                 )}
                               </div>
