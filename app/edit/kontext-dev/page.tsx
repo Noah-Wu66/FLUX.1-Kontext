@@ -15,11 +15,13 @@ export default function KontextDevPage() {
   const [images, setImages] = useState<GeneratedImage[]>([])
   const [loading, setLoading] = useState(false)
   const [currentSeed, setCurrentSeed] = useState<number | undefined>(undefined)
+  const [currentPrompt, setCurrentPrompt] = useState<string>('')
   const { success, error: showError, ToastContainer } = useToast()
 
   const handleGenerate = async (request: GenerationRequest) => {
     setLoading(true)
     setImages([])
+    setCurrentPrompt(request.prompt)
 
     try {
       const response = await fetch('/api/generate', {
@@ -144,11 +146,12 @@ export default function KontextDevPage() {
 
           {/* 生成结果 */}
           <div>
-            <ImageGallery 
-              images={images} 
-              loading={loading} 
+            <ImageGallery
+              images={images}
+              loading={loading}
               seed={currentSeed}
-              modelName="FLUX.1 Kontext [dev]"
+              model="kontext-dev"
+              prompt={currentPrompt}
             />
           </div>
         </div>
