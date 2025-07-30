@@ -6,9 +6,9 @@ export async function GET() {
   try {
     // 检查环境变量
     const envCheck = {
-      hasApiKey: !!process.env.OPENAI_API_KEY,
-      apiKeyLength: process.env.OPENAI_API_KEY?.length || 0,
-      baseUrl: process.env.OPENAI_BASE_URL || 'default',
+      hasApiKey: !!process.env.GEMINI_API_KEY,
+      apiKeyLength: process.env.GEMINI_API_KEY?.length || 0,
+      baseUrl: process.env.GEMINI_BASE_URL || 'default',
       isConfigured: geminiAPI.isConfigured()
     }
 
@@ -61,8 +61,8 @@ export async function POST(request: NextRequest) {
 
     console.log('测试 Gemini API 开始:', {
       prompt: prompt.substring(0, 100) + '...',
-      hasApiKey: !!process.env.OPENAI_API_KEY,
-      baseUrl: process.env.OPENAI_BASE_URL
+      hasApiKey: !!process.env.GEMINI_API_KEY,
+      baseUrl: process.env.GEMINI_BASE_URL
     })
 
     // 测试提示词优化
@@ -86,8 +86,8 @@ export async function POST(request: NextRequest) {
       originalPrompt: prompt,
       result,
       config: {
-        hasApiKey: !!process.env.OPENAI_API_KEY,
-        baseUrl: process.env.OPENAI_BASE_URL
+        hasApiKey: !!process.env.GEMINI_API_KEY,
+        baseUrl: process.env.GEMINI_BASE_URL
       }
     })
 

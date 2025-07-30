@@ -150,8 +150,8 @@ export interface EditPreset {
 ### 环境变量
 ```env
 # Gemini API（用于预设提示词生成）
-OPENAI_API_KEY=your_gemini_api_key
-OPENAI_BASE_URL=https://generativelanguage.googleapis.com/v1beta/openai/
+GEMINI_API_KEY=your_gemini_api_key
+GEMINI_BASE_URL=https://generativelanguage.googleapis.com/v1beta/openai/
 
 # FAL API（用于图片生成）
 FAL_KEY=your_fal_api_key

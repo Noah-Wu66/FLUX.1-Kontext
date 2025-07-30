@@ -38,8 +38,8 @@ export async function POST(request: NextRequest) {
     }
 
     // 检查环境变量配置
-    if (!process.env.OPENAI_API_KEY) {
-      console.error('OPENAI_API_KEY 环境变量未配置')
+    if (!process.env.GEMINI_API_KEY) {
+      console.error('GEMINI_API_KEY 环境变量未配置')
       return NextResponse.json(
         { success: false, error: 'AI 服务未配置，请联系管理员' },
         { status: 500 }

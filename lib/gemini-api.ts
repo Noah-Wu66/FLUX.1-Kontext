@@ -12,8 +12,8 @@ export class GeminiAPI {
   private constructor() {
     // 从环境变量获取配置
     this.config = {
-      apiKey: process.env.OPENAI_API_KEY || '',
-      baseUrl: process.env.OPENAI_BASE_URL || 'https://generativelanguage.googleapis.com/v1beta/openai/'
+      apiKey: process.env.GEMINI_API_KEY || '',
+      baseUrl: process.env.GEMINI_BASE_URL || 'https://generativelanguage.googleapis.com/v1beta/openai/'
     }
 
     // 初始化 OpenAI 客户端，使用 Gemini 配置
@@ -60,7 +60,7 @@ export class GeminiAPI {
       if (!this.isConfigured()) {
         return {
           success: false,
-          error: 'Gemini API 密钥未配置，请检查 OPENAI_API_KEY 环境变量'
+          error: 'Gemini API 密钥未配置，请检查 GEMINI_API_KEY 环境变量'
         }
       }
 

@@ -5,9 +5,9 @@ export async function GET(request: NextRequest) {
   try {
     // 检查环境变量配置
     const config = {
-      hasOpenAIApiKey: !!process.env.OPENAI_API_KEY,
-      openAIApiKeyLength: process.env.OPENAI_API_KEY?.length || 0,
-      openAIBaseUrl: process.env.OPENAI_BASE_URL || '未设置',
+      hasGeminiApiKey: !!process.env.GEMINI_API_KEY,
+      geminiApiKeyLength: process.env.GEMINI_API_KEY?.length || 0,
+      geminiBaseUrl: process.env.GEMINI_BASE_URL || '未设置',
       geminiConfigured: geminiAPI.isConfigured()
     }
 
